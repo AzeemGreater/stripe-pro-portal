@@ -247,7 +247,7 @@ router.post('/activate', async (req, res) => {
       site_secret_token: siteSecretToken,
       domain: cleanDomain,
       status: 'active',
-      portal_url: process.env.PORTAL_URL || 'https://stripe.azeemgreater.com',
+      portal_url: process.env.PORTAL_URL || 'https://neoxds.com',
       // Include cryptographic payload for plugin unlocking if retrieved from upstream
       ...(payloadBase64 && {
         payload_base64: payloadBase64,

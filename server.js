@@ -128,7 +128,7 @@ if (require.main === module) {
     console.log(`===============================================`);
     console.log(`🛡️  Shield Pro Portal running on port ${PORT}`);
     console.log(`🌐 Local URL: http://localhost:${PORT}`);
-    console.log(`🌐 Production URL: ${process.env.PORTAL_URL || 'https://stripe.azeemgreater.com'}`);
+    console.log(`🌐 Production URL: ${process.env.PORTAL_URL || 'https://neoxds.com'}`);
     console.log(`📅 Started at: ${new Date().toLocaleString()}`);
     console.log(`===============================================`);
   });
