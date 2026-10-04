@@ -8,482 +8,767 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%3E<text y=%2226%22 font-size=%2224%22>🛡️</text></svg>">
 </head>
 <body>
-  <!-- Top Global Header -->
-  <header class="portal-header">
-    <div class="portal-brand">
-      <span style="font-size: 20px;">🛡️</span>
-      <span>Shield Pro</span>
-      <span class="portal-brand-badge">Client Portal</span>
-    </div>
+  <div class="app-layout">
 
-    <div class="portal-nav-user">
-      <div class="user-pill">
-        <span>👤</span>
-        <span id="user-display-name">Loading...</span>
-        <span style="color: var(--text-light);">•</span>
-        <span id="user-site-quota" style="color: var(--text-muted); font-size: 12px;">0/10 Sites</span>
+    <!-- ======================================================================
+         1. FIXED MODERN STRIPE SIDEBAR (260px)
+         ====================================================================== -->
+    <aside class="portal-sidebar">
+      <div class="portal-sidebar-header">
+        <div class="portal-sidebar-brand">
+          <span style="font-size: 22px;">🛡️</span>
+          <span>Shield Pro</span>
+          <span class="portal-brand-badge">Portal</span>
+        </div>
       </div>
 
-      <button id="show-license-btn" class="btn btn-secondary btn-sm" title="View your activation credentials">
-        🔑 License & Activation
-      </button>
-
-      <button id="logout-btn" class="btn btn-secondary btn-sm">
-        Sign Out
-      </button>
-    </div>
-  </header>
-
-  <!-- Browser-Styled Tabs Bar (For Connected Websites) -->
-  <div class="browser-tab-bar" id="browser-tabs-bar">
-    <!-- Dynamically injected tabs for each connected website -->
-    <button class="browser-tab-add" id="add-site-tab-btn" title="Connect New WordPress Site">
-      +
-    </button>
-  </div>
-
-  <!-- Sub-Navigation for Selected Site (Settings, Transactions, Orders, Advance Tools) -->
-  <div class="sub-nav-bar" id="sub-nav-bar" style="display: none;">
-    <div class="sub-nav-tabs">
-      <button class="sub-tab-btn active" data-subtab="settings">
-        <span>⚙️</span>
-        <span>Settings</span>
-      </button>
-      <button class="sub-tab-btn" data-subtab="dashboard">
-        <span>📊</span>
-        <span>Transactions Dashboard</span>
-        <span class="badge-pill">Analytics</span>
-      </button>
-      <button class="sub-tab-btn" data-subtab="orders">
-        <span>🛒</span>
-        <span>WooCommerce Orders</span>
-      </button>
-      <button class="sub-tab-btn" data-subtab="advance_tools">
-        <span>🔧</span>
-        <span>Advance Tools</span>
-        <span class="badge-pill" style="background: #ecfdf5; color: #10b981;">Pro</span>
-      </button>
-    </div>
-
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <span id="site-status-indicator" class="badge badge-success">Online</span>
-      <button id="refresh-site-btn" class="btn btn-secondary btn-sm" title="Ping remote WordPress site">
-        🔄 Sync Site
-      </button>
-      <button id="disconnect-site-btn" class="btn btn-secondary btn-sm" style="color: var(--danger); border-color: #fecaca;" title="Disconnect site from portal">
-        Disconnect
-      </button>
-    </div>
-  </div>
-
-  <!-- Main View Area -->
-  <main class="portal-container" id="main-content-area">
-    <!-- Loading State -->
-    <div id="loading-placeholder" style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
-      <div style="font-size: 28px; margin-bottom: 12px; animation: spin 1s linear infinite;">⏳</div>
-      <p>Loading your connected websites and configuration...</p>
-    </div>
-
-    <!-- Empty State (No sites connected yet) -->
-    <div id="empty-sites-placeholder" class="portal-card" style="display: none; text-align: center; padding: 50px 24px;">
-      <div style="font-size: 42px; margin-bottom: 16px;">🌐</div>
-      <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">No Connected Websites Yet</h2>
-      <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto 24px auto;">
-        Activate your WordPress Stripe plugin using your account email and activation key. Once activated on your WordPress store, it will automatically appear here as a browser tab!
-      </p>
-      <button class="btn btn-primary" onclick="UserApp.openLicenseModal()">
-        🔑 View Activation Key & Instructions
-      </button>
-    </div>
-
-    <!-- Active Website Management Content -->
-    <div id="site-view-wrapper" style="display: none;">
-      
-      <!-- SUBTAB 1: SETTINGS -->
-      <section id="tab-content-settings" class="tab-pane">
-        <div class="portal-card">
-          <div class="portal-card-header">
-            <div>
-              <h2 class="portal-card-title"><span>⚙️</span> WooCommerce Stripe Gateway Settings</h2>
-              <p class="portal-card-subtitle">Manage payment gateway preferences directly on your WordPress store.</p>
-            </div>
-            <button id="save-settings-btn" class="btn btn-primary">
-              💾 Save Settings to WordPress
-            </button>
-          </div>
-
-          <form id="plugin-settings-form">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
-              <div>
-                <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-subtle); padding: 12px; border-radius: var(--radius);">
-                  <div>
-                    <label class="form-label" style="margin-bottom: 2px;">Enable Stripe Gateway</label>
-                    <span class="form-desc">Accept debit & credit card payments at checkout</span>
-                  </div>
-                  <label class="switch">
-                    <input type="checkbox" id="setting-enabled" checked>
-                    <span class="slider"></span>
-                  </label>
-                </div>
-
-                <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; background: #fffbeb; border: 1px solid #fef3c7; padding: 12px; border-radius: var(--radius); margin-top: 14px;">
-                  <div>
-                    <label class="form-label" style="color: #92400e; margin-bottom: 2px;">Test Mode</label>
-                    <span class="form-desc" style="color: #b45309;">Simulate transactions without charging real cards</span>
-                  </div>
-                  <label class="switch">
-                    <input type="checkbox" id="setting-testmode" checked>
-                    <span class="slider"></span>
-                  </label>
-                </div>
-
-                <div class="form-group" style="margin-top: 18px;">
-                  <label class="form-label" for="setting-title">Checkout Gateway Title</label>
-                  <input type="text" id="setting-title" class="form-control" value="Credit / Debit Card (Stripe)">
-                  <span class="form-desc">This controls the title which the user sees during checkout.</span>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label" for="setting-desc">Checkout Description</label>
-                  <textarea id="setting-desc" class="form-control" rows="3">Pay securely with your credit or debit card.</textarea>
-                  <span class="form-desc">Payment method description shown to buyers on checkout page.</span>
-                </div>
-              </div>
-
-              <div>
-                <div class="form-group">
-                  <label class="form-label" for="setting-statement">Statement Descriptor</label>
-                  <input type="text" id="setting-statement" class="form-control" maxlength="22" value="STORE NAME">
-                  <span class="form-desc">Appears on your customer's bank statement (maximum 22 characters).</span>
-                </div>
-
-                <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-subtle); padding: 12px; border-radius: var(--radius); margin-bottom: 12px;">
-                  <div>
-                    <label class="form-label" style="margin-bottom: 2px;">Capture Charge Immediately</label>
-                    <span class="form-desc">Authorize and capture funds automatically</span>
-                  </div>
-                  <label class="switch">
-                    <input type="checkbox" id="setting-capture" checked>
-                    <span class="slider"></span>
-                  </label>
-                </div>
-
-                <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-subtle); padding: 12px; border-radius: var(--radius); margin-bottom: 12px;">
-                  <div>
-                    <label class="form-label" style="margin-bottom: 2px;">Saved Cards (Tokenization)</label>
-                    <span class="form-desc">Allow returning customers to pay with saved cards</span>
-                  </div>
-                  <label class="switch">
-                    <input type="checkbox" id="setting-savedcards" checked>
-                    <span class="slider"></span>
-                  </label>
-                </div>
-
-                <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-subtle); padding: 12px; border-radius: var(--radius); margin-bottom: 12px;">
-                  <div>
-                    <label class="form-label" style="margin-bottom: 2px;">Inline Credit Card Form</label>
-                    <span class="form-desc">Present compact card inputs directly in checkout</span>
-                  </div>
-                  <label class="switch">
-                    <input type="checkbox" id="setting-inlineform">
-                    <span class="slider"></span>
-                  </label>
-                </div>
-
-                <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-subtle); padding: 12px; border-radius: var(--radius);">
-                  <div>
-                    <label class="form-label" style="margin-bottom: 2px;">Diagnostic Debug Logging</label>
-                    <span class="form-desc">Save API requests & errors to WooCommerce status logs</span>
-                  </div>
-                  <label class="switch">
-                    <input type="checkbox" id="setting-logging" checked>
-                    <span class="slider"></span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          </form>
+      <div class="portal-sidebar-body">
+        <div class="sidebar-section-title">
+          <span>Connected Stores</span>
+          <span class="sidebar-site-badge" id="sidebar-site-count">0</span>
         </div>
-      </section>
 
-      <!-- SUBTAB 2: TRANSACTIONS DASHBOARD -->
-      <section id="tab-content-dashboard" class="tab-pane" style="display: none;">
-        <!-- Analytics Header & Filter -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <!-- Dynamically Injected Stores List -->
+        <div class="sidebar-site-list" id="sidebar-sites-list">
+          <!-- Populated by user-dashboard.js -->
+        </div>
+
+        <!-- + Connect New Store Button -->
+        <button type="button" class="sidebar-add-btn" id="sidebar-add-site-btn">
+          <span>➕</span>
+          <span>Connect New Store</span>
+        </button>
+
+        <div style="margin-top: 24px;">
+          <div class="sidebar-section-title">
+            <span>Plugin Tools</span>
+          </div>
+          <button type="button" class="sidebar-site-item" id="sidebar-license-btn" style="width: 100%; border: none; background: transparent; text-align: left; cursor: pointer;">
+            <div class="sidebar-site-info">
+              <span class="sidebar-site-icon">🔑</span>
+              <span class="sidebar-site-domain">Activation & Key</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Sidebar Bottom: User Profile -->
+      <div class="portal-sidebar-footer">
+        <div class="sidebar-user-info">
+          <span class="sidebar-user-email" id="sidebar-user-email">Loading...</span>
+          <span class="sidebar-user-quota" id="sidebar-user-quota">0/10</span>
+        </div>
+        <button type="button" id="logout-btn" class="btn btn-secondary btn-sm" style="width: 100%;">
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- ======================================================================
+         2. MAIN LAYOUT AREA
+         ====================================================================== -->
+    <div class="portal-main-layout">
+      <!-- Top Bar: Current Selected Store Header & Status -->
+      <header class="portal-main-topbar" id="main-topbar" style="display: none;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div class="sidebar-site-icon" style="width: 36px; height: 36px; font-size: 18px; background: #eef2ff; color: #635bff;">🌐</div>
           <div>
-            <h2 style="font-size: 16px; font-weight: 700;">Stripe Performance & Analytics</h2>
-            <p style="font-size: 12px; color: var(--text-muted);">Real-time financial metrics and payment records for this store.</p>
-          </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <select id="analytics-range-select" class="form-select" style="width: 140px; padding: 5px 8px;">
-              <option value="24h">Last 24 Hours</option>
-              <option value="7d">Last 7 Days</option>
-              <option value="30d" selected>Last 30 Days</option>
-              <option value="90d">Last 90 Days</option>
-            </select>
-            <button id="refresh-analytics-btn" class="btn btn-secondary btn-sm">Refresh</button>
-          </div>
-        </div>
-
-        <!-- KPI Cards Grid -->
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-label">Gross Volume</div>
-            <div class="kpi-value" id="kpi-gross-volume">$0.00</div>
-            <div class="kpi-sub">Total payments received</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Net Volume</div>
-            <div class="kpi-value" id="kpi-net-volume" style="color: var(--success);">$0.00</div>
-            <div class="kpi-sub" id="kpi-fees-sub">Fees: $0.00</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Available Balance</div>
-            <div class="kpi-value" id="kpi-available-bal">$0.00</div>
-            <div class="kpi-sub" id="kpi-pending-sub">Pending: $0.00</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Success Rate</div>
-            <div class="kpi-value" id="kpi-success-rate">100%</div>
-            <div class="kpi-sub" id="kpi-success-count">0 successful / 0 failed</div>
-          </div>
-        </div>
-
-        <!-- Analytics Sub-Views (Transactions, Payouts, Disputes, Customers) -->
-        <div class="portal-card" style="padding: 0; overflow: hidden;">
-          <div style="background: var(--bg-subtle); border-bottom: 1px solid var(--border-color); padding: 8px 16px; display: flex; gap: 8px;">
-            <button class="btn btn-secondary btn-sm" id="subtab-tx-btn" onclick="UserApp.switchAnalyticsSubTab('transactions')" style="background: #fff; font-weight: 600;">Charges & Transactions</button>
-            <button class="btn btn-secondary btn-sm" id="subtab-payouts-btn" onclick="UserApp.switchAnalyticsSubTab('payouts')">Bank Payouts</button>
-            <button class="btn btn-secondary btn-sm" id="subtab-disputes-btn" onclick="UserApp.switchAnalyticsSubTab('disputes')">Disputes</button>
-            <button class="btn btn-secondary btn-sm" id="subtab-customers-btn" onclick="UserApp.switchAnalyticsSubTab('customers')">Stripe Customers</button>
-          </div>
-
-          <div id="analytics-table-container" style="padding: 16px;">
-            <!-- Rendered dynamically -->
-          </div>
-        </div>
-      </section>
-
-      <!-- SUBTAB 3: WOOCOMMERCE STORE ORDERS -->
-      <section id="tab-content-orders" class="tab-pane" style="display: none;">
-        <!-- Orders Metric Header -->
-        <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); margin-bottom: 16px;">
-          <div class="kpi-card" style="padding: 12px;">
-            <div class="kpi-label">Store Orders</div>
-            <div class="kpi-value" id="wc-stat-total" style="font-size: 20px;">0</div>
-          </div>
-          <div class="kpi-card" style="padding: 12px;">
-            <div class="kpi-label">Revenue (30d)</div>
-            <div class="kpi-value" id="wc-stat-revenue" style="font-size: 20px; color: var(--success);">$0.00</div>
-          </div>
-          <div class="kpi-card" style="padding: 12px;">
-            <div class="kpi-label">Completed</div>
-            <div class="kpi-value" id="wc-stat-completed" style="font-size: 20px;">0</div>
-          </div>
-          <div class="kpi-card" style="padding: 12px;">
-            <div class="kpi-label">Pending / Processing</div>
-            <div class="kpi-value" id="wc-stat-pending" style="font-size: 20px; color: #d97706;">0</div>
-          </div>
-        </div>
-
-        <div class="portal-card">
-          <div class="portal-card-header">
-            <div>
-              <h2 class="portal-card-title"><span>🛒</span> WooCommerce Store Orders</h2>
-              <p class="portal-card-subtitle">Real-time store purchases processed through your WooCommerce Stripe Gateway.</p>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <h2 id="topbar-store-name" style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0;">Select Store</h2>
+              <a id="topbar-store-url" href="#" target="_blank" style="font-size: 13px; color: #635bff; font-weight: 600;" title="Visit Website">Open Store ↗</a>
             </div>
-            <div style="display: flex; gap: 8px;">
-              <select id="orders-status-filter" class="form-select" style="width: 140px; padding: 4px 8px;">
-                <option value="">All Statuses</option>
-                <option value="completed">Completed</option>
-                <option value="processing">Processing</option>
-                <option value="pending">Pending Payment</option>
-                <option value="on-hold">On Hold</option>
-                <option value="cancelled">Cancelled</option>
-                <option value="refunded">Refunded</option>
-              </select>
-              <button id="refresh-orders-btn" class="btn btn-secondary btn-sm">Refresh Orders</button>
-            </div>
-          </div>
-
-          <div id="wc-keys-warning" style="display: none; background: #fffbeb; border: 1px solid #fde68a; padding: 16px; border-radius: var(--radius); margin-bottom: 16px;">
-            <h4 style="color: #92400e; font-size: 14px; margin-bottom: 4px;">⚠️ WooCommerce REST API Credentials Required</h4>
-            <p style="color: #b45309; font-size: 12px; margin-bottom: 12px;">
-              To fetch live orders directly from this store, generate Read/Write REST API keys in your WordPress Admin (<strong>WooCommerce &gt; Settings &gt; Advanced &gt; REST API</strong>) and enter them below:
-            </p>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-              <input type="text" id="input-wc-ck" class="form-control" placeholder="ck_xxxxxxxxxxxxxxxxxxxxxxxx" style="flex: 1; min-width: 200px;">
-              <input type="password" id="input-wc-cs" class="form-control" placeholder="cs_xxxxxxxxxxxxxxxxxxxxxxxx" style="flex: 1; min-width: 200px;">
-              <button class="btn btn-primary" onclick="UserApp.saveWcKeys()">Save Keys & Load Orders</button>
-            </div>
-          </div>
-
-          <div class="portal-table-wrap">
-            <table class="portal-table">
-              <thead>
-                <tr>
-                  <th>Order</th>
-                  <th>Date</th>
-                  <th>Customer</th>
-                  <th>Items</th>
-                  <th>Total</th>
-                  <th>Payment Method</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody id="wc-orders-tbody">
-                <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">Loading orders...</td></tr>
-              </tbody>
-            </table>
+            <div style="font-size: 12px; color: #64748b;" id="topbar-store-sub">Synced with Shield Pro v3.5.0</div>
           </div>
         </div>
-      </section>
 
-      <!-- SUBTAB 4: ADVANCE TOOLS -->
-      <section id="tab-content-advance_tools" class="tab-pane" style="display: none;">
-        <div class="portal-card">
-          <div class="portal-card-header">
-            <div>
-              <h2 class="portal-card-title"><span>🔧</span> Metadata Customizer & White-Label Suite</h2>
-              <p class="portal-card-subtitle">Control the metadata, store identifier, and charge descriptions passed to Stripe.</p>
-            </div>
-            <button id="save-tools-btn" class="btn btn-primary">
-              💾 Save Metadata Rules
-            </button>
-          </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span id="site-status-indicator" class="badge badge-success">Online</span>
+          <button type="button" id="refresh-site-btn" class="btn btn-secondary btn-sm" title="Ping remote WordPress site">
+            🔄 Sync Site
+          </button>
+          <button type="button" id="disconnect-site-btn" class="btn btn-secondary btn-sm" style="color: var(--danger); border-color: #fee2e2;" title="Disconnect site from portal" onclick="UserApp.disconnectCurrentSite()">
+            Disconnect
+          </button>
+        </div>
+      </header>
 
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 28px;">
-            <!-- Controls Form -->
-            <div>
-              <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-subtle); padding: 14px; border-radius: var(--radius); margin-bottom: 18px;">
-                <div>
-                  <label class="form-label" style="margin-bottom: 2px;">Enable Custom Stripe Metadata</label>
-                  <span class="form-desc">Override default descriptions on PaymentIntents and Charges</span>
+      <!-- Sub-Navigation for Selected Site (Exact 100% WordPress Plugin Tab Underline Design) -->
+      <div class="wc-stripe-tabs-nav-wrapper" id="sub-nav-bar" style="display: none;">
+        <div class="wc-stripe-tabs-nav" role="tablist">
+          <button type="button" class="wc-stripe-tab-btn is-active" data-subtab="settings">
+            <span>⚙️</span>
+            <span>Settings</span>
+          </button>
+          <button type="button" class="wc-stripe-tab-btn" data-subtab="dashboard">
+            <span>📊</span>
+            <span>Dashboard</span>
+            <span class="wc-stripe-tab-pill">Analytics</span>
+          </button>
+          <button type="button" class="wc-stripe-tab-btn" data-subtab="orders">
+            <span>🛒</span>
+            <span>WooCommerce Orders</span>
+            <span class="wc-stripe-tab-pill is-pro">Store</span>
+          </button>
+          <button type="button" class="wc-stripe-tab-btn" data-subtab="advance_tools">
+            <span>🔧</span>
+            <span>Advance Tools</span>
+            <span class="wc-stripe-tab-pill is-beta">Privacy Suite</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Container (Full Width, 32px side gutters) -->
+      <main class="portal-container" id="main-content-area">
+        <!-- Loading State -->
+        <div id="loading-placeholder" style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+          <div style="font-size: 32px; margin-bottom: 12px;">⏳</div>
+          <p style="font-weight: 500;">Loading your connected WordPress stores and configuration...</p>
+        </div>
+
+        <!-- Empty State (No sites connected yet) -->
+        <div id="empty-sites-placeholder" class="wc-stripe-customizer-card" style="display: none; text-align: center; padding: 50px 24px;">
+          <div style="font-size: 48px; margin-bottom: 16px;">🌐</div>
+          <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--text-main);">No Connected Websites Yet</h2>
+          <p style="color: var(--text-muted); max-width: 540px; margin: 0 auto 24px auto; line-height: 1.6;">
+            Activate your WordPress Stripe plugin using your account email and activation key. Once activated on your WooCommerce store, it will automatically connect and appear in your sidebar!
+          </p>
+          <button type="button" class="btn-primary" onclick="UserApp.openLicenseModal()">
+            🔑 View Activation Key & Instructions
+          </button>
+        </div>
+
+        <!-- Active Website Management Content -->
+        <div id="site-view-wrapper" style="display: none;">
+          
+          <!-- ====================================================================
+               SUBTAB 1: SETTINGS (Exact WordPress Plugin Gateway Configuration)
+               ==================================================================== -->
+          <section id="tab-content-settings" class="tab-pane">
+            <div class="wc-stripe-customizer-card">
+              <div class="wc-stripe-customizer-header">
+                <div class="wc-stripe-customizer-header-left">
+                  <div class="wc-stripe-customizer-icon-wrap">⚙️</div>
+                  <div>
+                    <h3 class="wc-stripe-customizer-title">WooCommerce Stripe Gateway Settings</h3>
+                    <p class="wc-stripe-customizer-subtitle">Manage payment processing preferences synced directly with your WordPress store.</p>
+                  </div>
                 </div>
-                <label class="switch">
-                  <input type="checkbox" id="tool-meta-enabled">
-                  <span class="slider"></span>
-                </label>
+                <button type="button" id="save-settings-btn" class="wc-stripe-save-btn">
+                  💾 Save Settings to WordPress
+                </button>
               </div>
 
-              <div class="form-group">
-                <label class="form-label" for="tool-store-name">Store Name / Brand Identifier</label>
-                <input type="text" id="tool-store-name" class="form-control" value="BEKAPAINT LIMITED">
-                <span class="form-desc">Replaces default store naming in customer statements and metadata.</span>
-              </div>
+              <form id="plugin-settings-form">
+                <!-- Section 0: Exact Account Details from WooCommerce Stripe Plugin -->
+                <div style="display: flex; gap: 32px; padding: 20px 0 28px 0; border-bottom: 1px solid #e2e8f0; margin-bottom: 24px; flex-wrap: wrap;">
+                  <div style="width: 260px; flex-shrink: 0;">
+                    <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 6px;">Account details</h3>
+                    <p style="font-size: 13px; color: #64748b; line-height: 1.45;">View account overview and edit business details.</p>
+                  </div>
 
-              <div class="form-group">
-                <label class="form-label" for="tool-site-url">Store URL in Stripe Metadata</label>
-                <select id="tool-site-url" class="form-select">
-                  <option value="hidden" selected>Hidden (Maximum Privacy / Shielded)</option>
-                  <option value="send">Send full store domain URL</option>
-                </select>
-                <span class="form-desc">When set to 'Hidden', the origin domain is omitted from Stripe charge logs.</span>
-              </div>
+                  <div class="wc-stripe-customizer-card" style="flex: 1; min-width: 320px; border: 1px solid #e2e8f0; border-radius: 12px; padding: 22px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;">
+                      <span id="account-email-display" style="font-size: 15px; font-weight: 600; color: #0f172a;">seller@store.com</span>
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <span id="account-id-display" style="font-family: var(--font-mono); font-size: 12.5px; color: #64748b;">acct_1MGQkGJVdJ6RWI1W</span>
+                        <button type="button" id="account-more-btn" style="background: none; border: none; font-size: 18px; color: #64748b; cursor: pointer; padding: 2px 6px;">⋮</button>
+                      </div>
+                    </div>
 
-              <div class="form-group">
-                <label class="form-label" for="tool-desc-template">Order Description Template</label>
-                <input type="text" id="tool-desc-template" class="form-control" value="{store_name} - order {order_number}">
-                <span class="form-desc">Click tags below to insert dynamically into template:</span>
+                    <!-- Status Badges Row -->
+                    <div style="display: flex; align-items: center; gap: 28px; margin-bottom: 18px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; color: #475569; flex-wrap: wrap;">
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <span>PAYMENT</span>
+                        <span id="badge-payment-status" style="background: #e6f9ed; color: #16a34a; padding: 3px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600;">Enabled</span>
+                      </div>
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <span>PAYOUT</span>
+                        <span id="badge-payout-status" style="background: #e6f9ed; color: #16a34a; padding: 3px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600;">Enabled</span>
+                      </div>
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <span>WEBHOOK</span>
+                        <span id="badge-webhook-status" style="background: #e6f9ed; color: #16a34a; padding: 3px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600;">Enabled</span>
+                      </div>
+                    </div>
+
+                    <!-- Explanatory Text -->
+                    <p style="font-size: 13px; color: #475569; margin-bottom: 20px; line-height: 1.5;">
+                      Click the <strong>Configure connection</strong> button to <a href="#" id="configure-webhook-link" style="color: #635bff; text-decoration: underline;">configure a webhook ↗</a>. This will complete your Stripe account connection process.
+                    </p>
+
+                    <!-- Configure Connection Button -->
+                    <div>
+                      <button type="button" id="btn-configure-connection" class="btn btn-secondary" style="border: 1.5px solid #635bff; color: #635bff; font-weight: 600; padding: 7px 18px; border-radius: 6px; background: #ffffff;">
+                        Configure connection
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section 1: General Gateway Settings -->
+                <div class="wc-stripe-section-divider-title">General Payment Gateway Settings</div>
                 
-                <div style="margin-top: 8px;">
-                  <button type="button" class="tag-btn" onclick="UserApp.insertTemplateTag('{store_name}')">{store_name}</button>
-                  <button type="button" class="tag-btn" onclick="UserApp.insertTemplateTag('{order_number}')">{order_number}</button>
-                  <button type="button" class="tag-btn" onclick="UserApp.insertTemplateTag('{customer_name}')">{customer_name}</button>
-                  <button type="button" class="tag-btn" onclick="UserApp.insertTemplateTag('{order_date}')">{order_date}</button>
-                  <button type="button" class="tag-btn" onclick="UserApp.insertTemplateTag('{order_total}')">{order_total}</button>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 24px;">
+                  <div>
+                    <div class="wc-stripe-toggle-feature-row">
+                      <div>
+                        <span class="wc-stripe-toggle-feature-title">Enable Stripe Gateway</span>
+                        <span class="wc-stripe-toggle-feature-desc">Accept credit & debit card payments via Stripe</span>
+                      </div>
+                      <label class="wc-stripe-toggle-switch">
+                        <input type="checkbox" id="setting-enabled" checked>
+                        <span class="wc-stripe-toggle-slider"></span>
+                      </label>
+                    </div>
+
+                    <div class="wc-stripe-toggle-feature-row" style="background: #fffbeb; border-color: #fde68a;">
+                      <div>
+                        <span class="wc-stripe-toggle-feature-title" style="color: #92400e;">Test Mode</span>
+                        <span class="wc-stripe-toggle-feature-desc" style="color: #b45309;">Simulate transactions without charging real bank cards</span>
+                      </div>
+                      <label class="wc-stripe-toggle-switch">
+                        <input type="checkbox" id="setting-testmode" checked>
+                        <span class="wc-stripe-toggle-slider"></span>
+                      </label>
+                    </div>
+
+                    <div class="wc-stripe-field-group">
+                      <label class="wc-stripe-field-label" for="setting-title">Checkout Gateway Title</label>
+                      <input type="text" id="setting-title" class="wc-stripe-input" value="Credit / Debit Card (Stripe)">
+                      <p class="wc-stripe-field-help">Title shown to customers during checkout.</p>
+                    </div>
+
+                    <div class="wc-stripe-field-group">
+                      <label class="wc-stripe-field-label" for="setting-desc">Checkout Description</label>
+                      <textarea id="setting-desc" class="wc-stripe-input" rows="3">Pay securely with your credit or debit card.</textarea>
+                      <p class="wc-stripe-field-help">Payment explanation shown under the method at checkout.</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="wc-stripe-field-group">
+                      <label class="wc-stripe-field-label" for="setting-statement">Bank Statement Descriptor</label>
+                      <input type="text" id="setting-statement" class="wc-stripe-input" maxlength="22" value="STORE NAME">
+                      <p class="wc-stripe-field-help">Appears on customer credit card statement (max 22 characters).</p>
+                    </div>
+
+                    <div class="wc-stripe-toggle-feature-row">
+                      <div>
+                        <span class="wc-stripe-toggle-feature-title">Capture Charge Immediately</span>
+                        <span class="wc-stripe-toggle-feature-desc">Authorize and capture funds upon checkout completion</span>
+                      </div>
+                      <label class="wc-stripe-toggle-switch">
+                        <input type="checkbox" id="setting-capture" checked>
+                        <span class="wc-stripe-toggle-slider"></span>
+                      </label>
+                    </div>
+
+                    <div class="wc-stripe-toggle-feature-row">
+                      <div>
+                        <span class="wc-stripe-toggle-feature-title">Saved Cards (Tokenization)</span>
+                        <span class="wc-stripe-toggle-feature-desc">Allow returning customers to pay with saved payment methods</span>
+                      </div>
+                      <label class="wc-stripe-toggle-switch">
+                        <input type="checkbox" id="setting-savedcards" checked>
+                        <span class="wc-stripe-toggle-slider"></span>
+                      </label>
+                    </div>
+
+                    <div class="wc-stripe-toggle-feature-row">
+                      <div>
+                        <span class="wc-stripe-toggle-feature-title">Inline Credit Card Form</span>
+                        <span class="wc-stripe-toggle-feature-desc">Present compact card inputs directly in checkout</span>
+                      </div>
+                      <label class="wc-stripe-toggle-switch">
+                        <input type="checkbox" id="setting-inlineform">
+                        <span class="wc-stripe-toggle-slider"></span>
+                      </label>
+                    </div>
+
+                    <div class="wc-stripe-toggle-feature-row">
+                      <div>
+                        <span class="wc-stripe-toggle-feature-title">Diagnostic Debug Logging</span>
+                        <span class="wc-stripe-toggle-feature-desc">Save API requests & errors to WooCommerce status logs</span>
+                      </div>
+                      <label class="wc-stripe-toggle-switch">
+                        <input type="checkbox" id="setting-logging" checked>
+                        <span class="wc-stripe-toggle-slider"></span>
+                      </label>
+                    </div>
+                  </div>
                 </div>
+
+                <!-- Connection & Health Status -->
+                <div class="wc-stripe-section-divider-title">Remote API Connection & Webhooks</div>
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                  <div>
+                    <div style="font-weight: 600; font-size: 13.5px; color: var(--text-main);">Remote Store Webhook Synchronization</div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+                      Webhook Endpoint: <code id="webhook-endpoint-url" style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono); color: #0f172a;">https://.../?wc-api=wc_stripe</code>
+                    </div>
+                  </div>
+                  <div>
+                    <button type="button" id="ping-webhook-btn" class="btn-secondary btn-sm" onclick="UserApp.pingCurrentSite()">
+                      ⚡ Verify Webhook Health
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </section>
+
+          <!-- ====================================================================
+               SUBTAB 2: DASHBOARD (Stripe Live Analytics & Transactions)
+               ==================================================================== -->
+          <section id="tab-content-dashboard" class="tab-pane" style="display: none;">
+            <!-- Connected Stripe Account Banner -->
+            <div class="wc-stripe-account-banner">
+              <div class="wc-stripe-account-banner-left">
+                <div class="wc-stripe-account-avatar">⚡</div>
+                <div>
+                  <div class="wc-stripe-account-title" id="stripe-banner-name">Stripe Connected Store</div>
+                  <div class="wc-stripe-account-subtitle">
+                    Account: <code id="stripe-banner-acct" style="font-family: var(--font-mono); font-weight: 600;">acct_live_...</code>
+                    <span style="margin: 0 6px;">•</span>
+                    <span id="stripe-banner-mode" class="badge badge-success">Live Mode</span>
+                    <span style="margin: 0 6px;">•</span>
+                    <span id="stripe-banner-currency" style="font-weight: 600; color: #0f172a;">USD ($)</span>
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <select id="analytics-range-select" class="wc-stripe-input" style="width: auto; padding: 6px 12px; font-size: 12.5px;">
+                  <option value="7d">Last 7 Days</option>
+                  <option value="30d" selected>Last 30 Days</option>
+                  <option value="90d">Last 90 Days</option>
+                  <option value="year">Past Year</option>
+                </select>
+                <button type="button" id="refresh-analytics-btn" class="btn-secondary btn-sm">🔄 Refresh</button>
               </div>
             </div>
 
-            <!-- Live Card Preview -->
-            <div>
-              <div style="font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-main);">
-                👁️ Live Stripe Charge & Receipt Preview
+            <!-- 4 Primary KPI Metric Cards -->
+            <div class="kpi-grid">
+              <div class="kpi-card">
+                <div class="kpi-label">Gross Volume</div>
+                <div class="kpi-value" id="stat-gross-volume">$0.00</div>
+                <div class="kpi-sub" id="stat-charges-count">0 successful payments</div>
               </div>
-              <div class="preview-charge-card">
-                <div class="preview-charge-header">
-                  <span>STRIPE PAYMENTINTENT SIMULATION</span>
-                  <span class="badge badge-success">SUCCEEDED</span>
-                </div>
-
-                <div class="preview-charge-row">
-                  <span class="preview-charge-label">Amount</span>
-                  <span class="preview-charge-value">$129.00 USD</span>
-                </div>
-
-                <div class="preview-charge-row">
-                  <span class="preview-charge-label">Statement Brand</span>
-                  <span class="preview-charge-value" id="preview-brand-val">BEKAPAINT LIMITED</span>
-                </div>
-
-                <div class="preview-charge-row">
-                  <span class="preview-charge-label">Order Description</span>
-                  <span class="preview-charge-value" id="preview-desc-val" style="color: var(--primary); font-family: monospace;">BEKAPAINT LIMITED - order 1042</span>
-                </div>
-
-                <div class="preview-charge-row">
-                  <span class="preview-charge-label">Origin Domain</span>
-                  <span class="preview-charge-value" id="preview-url-val" style="color: var(--text-muted);">[Hidden / Omitted]</span>
-                </div>
-
-                <div class="preview-charge-row">
-                  <span class="preview-charge-label">Metadata Tags</span>
-                  <span class="preview-charge-value" style="font-size: 11px;">customer_ref: Sarah Jenkins • id: #1042</span>
-                </div>
+              <div class="kpi-card">
+                <div class="kpi-label">Net Sales Volume</div>
+                <div class="kpi-value" id="stat-net-volume" style="color: var(--primary);">$0.00</div>
+                <div class="kpi-sub">Total sales minus processing fees</div>
               </div>
-
-              <div style="margin-top: 14px; background: var(--bg-subtle); padding: 12px; border-radius: var(--radius); border: 1px solid var(--border-color); font-size: 12px; color: var(--text-muted);">
-                💡 <strong>Privacy Protection:</strong> Shield Pro sanitizes metadata before it hits Stripe API logs, preventing automated merchant scans from exposing your actual WordPress site URL.
+              <div class="kpi-card">
+                <div class="kpi-label">Total Payouts</div>
+                <div class="kpi-value" id="stat-payouts-volume">$0.00</div>
+                <div class="kpi-sub" id="stat-payouts-count">0 bank deposits issued</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-label">Disputes & Losses</div>
+                <div class="kpi-value" id="stat-disputes-count" style="color: var(--danger);">0</div>
+                <div class="kpi-sub">0.00% chargeback rate (Healthy)</div>
               </div>
             </div>
-          </div>
+
+            <!-- Transactions / Payouts / Disputes Sub-tabs Section -->
+            <div class="wc-stripe-customizer-card" style="padding: 0; overflow: hidden;">
+              <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; background: #ffffff;">
+                <div style="display: flex; gap: 6px;">
+                  <button type="button" class="btn-secondary btn-sm active" id="btn-sub-tx" onclick="UserApp.switchAnalyticsSubTab('transactions')">
+                    Payments (Charges)
+                  </button>
+                  <button type="button" class="btn-secondary btn-sm" id="btn-sub-payouts" onclick="UserApp.switchAnalyticsSubTab('payouts')">
+                    Payouts
+                  </button>
+                  <button type="button" class="btn-secondary btn-sm" id="btn-sub-disputes" onclick="UserApp.switchAnalyticsSubTab('disputes')">
+                    Disputes
+                  </button>
+                  <button type="button" class="btn-secondary btn-sm" id="btn-sub-customers" onclick="UserApp.switchAnalyticsSubTab('customers')">
+                    Customers
+                  </button>
+                </div>
+
+                <!-- Status Filter Pills -->
+                <div class="wc-stripe-filter-bar" id="tx-filter-pills">
+                  <span class="wc-stripe-filter-pill is-active" data-filter="all" onclick="UserApp.setTxFilter('all')">All</span>
+                  <span class="wc-stripe-filter-pill" data-filter="succeeded" onclick="UserApp.setTxFilter('succeeded')">Succeeded</span>
+                  <span class="wc-stripe-filter-pill" data-filter="refunded" onclick="UserApp.setTxFilter('refunded')">Refunded</span>
+                  <span class="wc-stripe-filter-pill" data-filter="failed" onclick="UserApp.setTxFilter('failed')">Failed</span>
+                </div>
+              </div>
+
+              <!-- Search Bar -->
+              <div style="padding: 12px 20px; background: #f8fafc; border-bottom: 1px solid var(--border-color);">
+                <input type="text" id="tx-search-input" class="wc-stripe-input" placeholder="🔍 Search transactions by ID, customer name, email, or amount..." oninput="UserApp.handleTxSearch(this.value)">
+              </div>
+
+              <!-- Transactions Table -->
+              <div style="overflow-x: auto;">
+                <table class="portal-table" id="transactions-table">
+                  <thead>
+                    <tr>
+                      <th>Status</th>
+                      <th>Amount</th>
+                      <th>Customer</th>
+                      <th>Payment Method</th>
+                      <th>Description</th>
+                      <th>Date (UTC)</th>
+                      <th>Stripe ID</th>
+                    </tr>
+                  </thead>
+                  <tbody id="transactions-table-body">
+                    <tr>
+                      <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 40px 20px;">
+                        No transactions found for the selected time range.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- ====================================================================
+               SUBTAB 3: WOOCOMMERCE ORDERS (Store Orders via WooCommerce REST API)
+               ==================================================================== -->
+          <section id="tab-content-orders" class="tab-pane" style="display: none;">
+            <div class="wc-stripe-customizer-card">
+              <div class="wc-stripe-customizer-header">
+                <div class="wc-stripe-customizer-header-left">
+                  <div class="wc-stripe-customizer-icon-wrap">🛒</div>
+                  <div>
+                    <h3 class="wc-stripe-customizer-title">WooCommerce Store Orders</h3>
+                    <p class="wc-stripe-customizer-subtitle">Live store orders retrieved directly from your remote WordPress database via REST API.</p>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                  <select id="orders-status-filter" class="wc-stripe-input" style="width: auto; padding: 6px 12px; font-size: 12.5px;">
+                    <option value="any">All Statuses</option>
+                    <option value="processing">Processing</option>
+                    <option value="completed">Completed</option>
+                    <option value="on-hold">On Hold</option>
+                    <option value="pending">Pending Payment</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="refunded">Refunded</option>
+                    <option value="failed">Failed</option>
+                  </select>
+                  <button type="button" id="refresh-orders-btn" class="btn-secondary btn-sm">🔄 Refresh Orders</button>
+                </div>
+              </div>
+
+              <!-- Quick Store Order Metric Highlights -->
+              <div class="kpi-grid" style="margin-bottom: 20px;">
+                <div class="kpi-card" style="padding: 16px;">
+                  <div class="kpi-label">Processing Orders</div>
+                  <div class="kpi-value" id="stat-order-processing" style="font-size: 22px; color: var(--warning);">0</div>
+                  <div class="kpi-sub">Awaiting fulfillment</div>
+                </div>
+                <div class="kpi-card" style="padding: 16px;">
+                  <div class="kpi-label">Completed Orders</div>
+                  <div class="kpi-value" id="stat-order-completed" style="font-size: 22px; color: var(--success);">0</div>
+                  <div class="kpi-sub">Fulfilled & dispatched</div>
+                </div>
+                <div class="kpi-card" style="padding: 16px;">
+                  <div class="kpi-label">Total Store Sales</div>
+                  <div class="kpi-value" id="stat-order-total-sales" style="font-size: 22px;">$0.00</div>
+                  <div class="kpi-sub">Across all recorded orders</div>
+                </div>
+                <div class="kpi-card" style="padding: 16px;">
+                  <div class="kpi-label">Sync Status</div>
+                  <div class="kpi-value" id="stat-order-sync-status" style="font-size: 18px; color: var(--info);">Active</div>
+                  <div class="kpi-sub">Real-time REST connection</div>
+                </div>
+              </div>
+
+              <!-- Orders Table -->
+              <div style="overflow-x: auto;">
+                <table class="portal-table" id="orders-table">
+                  <thead>
+                    <tr>
+                      <th>Order #</th>
+                      <th>Date</th>
+                      <th>Customer</th>
+                      <th>Payment Method</th>
+                      <th>Total</th>
+                      <th>Status</th>
+                      <th>Items</th>
+                    </tr>
+                  </thead>
+                  <tbody id="orders-table-body">
+                    <tr>
+                      <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 40px 20px;">
+                        No WooCommerce orders loaded yet. Connect your WooCommerce API keys in Settings.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- ====================================================================
+               SUBTAB 4: ADVANCE TOOLS (Stripe Privacy & Data Cloaking Suite)
+               ==================================================================== -->
+          <section id="tab-content-advance_tools" class="tab-pane" style="display: none;">
+            <div class="wc-stripe-customizer-card">
+              <div class="wc-stripe-customizer-header">
+                <div class="wc-stripe-customizer-header-left">
+                  <div class="wc-stripe-customizer-icon-wrap">🛡️</div>
+                  <div>
+                    <h3 class="wc-stripe-customizer-title">Stripe Privacy &amp; Data Cloaking Suite</h3>
+                    <p class="wc-stripe-customizer-subtitle">
+                      Control what customer metadata, descriptors, and transaction details are sent to Stripe.
+                    </p>
+                  </div>
+                </div>
+                <div class="wc-stripe-tag-group">
+                  <span class="wc-stripe-tag-chip">v3.5.0</span>
+                  <span class="wc-stripe-tag-chip is-active">Cloaking Active</span>
+                </div>
+              </div>
+
+              <div class="wc-stripe-customizer-body">
+                <!-- Left Column: Cloaking Configuration Controls -->
+                <div class="wc-stripe-customizer-controls-col">
+                  <!-- Master Enable Switch -->
+                  <div class="wc-stripe-toggle-feature-row" style="background: #eef2ff; border-color: #c7d2fe;">
+                    <div>
+                      <span class="wc-stripe-toggle-feature-title" style="color: #3730a3; font-weight: 700;">
+                        Enable Data Cloaking Suite
+                      </span>
+                      <span class="wc-stripe-toggle-feature-desc" style="color: #4338ca;">
+                        Master switch: Enforces custom store descriptors, hides URLs, and scrubs customer PII.
+                      </span>
+                    </div>
+                    <label class="wc-stripe-toggle-switch">
+                      <input type="checkbox" id="tool-meta-enabled" checked>
+                      <span class="wc-stripe-toggle-slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="wc-stripe-field-group">
+                    <label class="wc-stripe-field-label" for="tool-store-name">Custom Store / Brand Name</label>
+                    <input type="text" id="tool-store-name" class="wc-stripe-input" value="BEKAPAINT LIMITED" placeholder="e.g. BEKAPAINT LIMITED">
+                    <p class="wc-stripe-field-help">Overrides default WordPress site name in Stripe charges &amp; metadata.</p>
+                  </div>
+
+                  <div class="wc-stripe-field-group">
+                    <label class="wc-stripe-field-label" for="tool-desc-template">Order Description Template</label>
+                    <input type="text" id="tool-desc-template" class="wc-stripe-input" value="{store_name} - order {order_number}">
+                    <p class="wc-stripe-field-help">
+                      Dynamic tags: <code class="wc-stripe-code-tag">{store_name}</code>, <code class="wc-stripe-code-tag">{order_number}</code>
+                    </p>
+                  </div>
+
+                  <div class="wc-stripe-field-group">
+                    <label class="wc-stripe-field-label" for="tool-site-url">Site URL Override in Metadata</label>
+                    <input type="text" id="tool-site-url" class="wc-stripe-input" value="hidden" placeholder="e.g. hidden or custom-domain.com">
+                    <p class="wc-stripe-field-help">Set to <code>hidden</code> or a decoy URL to cloak the origin store domain.</p>
+                  </div>
+
+                  <div class="wc-stripe-field-group">
+                    <label class="wc-stripe-field-label" for="tool-statement-suffix">Statement Descriptor Suffix</label>
+                    <input type="text" id="tool-statement-suffix" class="wc-stripe-input" value="BEKAPAINT" maxlength="22" placeholder="e.g. BEKAPAINT">
+                    <p class="wc-stripe-field-help">Appears on customer bank statement alongside bank charge text (max 22 chars).</p>
+                  </div>
+
+                  <!-- 3 Advanced Cloaking Toggles -->
+                  <div class="wc-stripe-toggle-feature-row">
+                    <div>
+                      <span class="wc-stripe-toggle-feature-title">Level 3 Line-Item Data Cloaking</span>
+                      <span class="wc-stripe-toggle-feature-desc">Strip individual product titles, SKUs, and line items from Stripe charges.</span>
+                    </div>
+                    <label class="wc-stripe-toggle-switch">
+                      <input type="checkbox" id="tool-mask-level3" checked>
+                      <span class="wc-stripe-toggle-slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="wc-stripe-toggle-feature-row">
+                    <div>
+                      <span class="wc-stripe-toggle-feature-title">Customer PII Anonymization</span>
+                      <span class="wc-stripe-toggle-feature-desc">Anonymize customer names and emails in Stripe transaction logs.</span>
+                    </div>
+                    <label class="wc-stripe-toggle-switch">
+                      <input type="checkbox" id="tool-mask-pii" checked>
+                      <span class="wc-stripe-toggle-slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="wc-stripe-toggle-feature-row">
+                    <div>
+                      <span class="wc-stripe-toggle-feature-title">Strip Physical Shipping Address</span>
+                      <span class="wc-stripe-toggle-feature-desc">Do not transmit physical recipient shipping address to Stripe API.</span>
+                    </div>
+                    <label class="wc-stripe-toggle-switch">
+                      <input type="checkbox" id="tool-strip-shipping" checked>
+                      <span class="wc-stripe-toggle-slider"></span>
+                    </label>
+                  </div>
+
+                  <div style="margin-top: 16px;">
+                    <button type="button" id="save-tools-btn" class="wc-stripe-save-btn" onclick="UserApp.saveAdvanceTools()">
+                      💾 Save Privacy Settings
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Right Column: Exact Dark Navy Stripe Mockup Card -->
+                <div class="wc-stripe-customizer-preview-col">
+                  <div class="wc-stripe-mock-stripe-card">
+                    <div class="wc-stripe-mock-header">
+                      <div class="wc-stripe-mock-brand">
+                        <span class="wc-stripe-mock-stripe-logo">stripe</span>
+                        <span class="wc-stripe-mock-tag">Dashboard Live Preview</span>
+                      </div>
+                      <span id="mock-status-pill" class="wc-stripe-mock-status-pill is-off">Default State (Disabled)</span>
+                    </div>
+
+                    <div class="wc-stripe-mock-row">
+                      <span class="wc-stripe-mock-label">Statement Description:</span>
+                      <span class="wc-stripe-mock-value is-desc" id="mock-desc-val">BEKAPAINT LIMITED - order 1042</span>
+                    </div>
+
+                    <div class="wc-stripe-mock-row" id="mock-suffix-row">
+                      <span class="wc-stripe-mock-label">Bank Statement Descriptor:</span>
+                      <span class="wc-stripe-mock-value is-suffix" id="mock-suffix-val">STRIPE* BEKAPAINT</span>
+                    </div>
+
+                    <div class="wc-stripe-mock-row">
+                      <span class="wc-stripe-mock-label">Product Data &amp; Shipping Status:</span>
+                      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <span id="mock-level3-badge" class="wc-stripe-pill-badge is-exposed">Level 3 Items: Transmitted</span>
+                        <span id="mock-shipping-badge" class="wc-stripe-pill-badge is-exposed">Shipping Addr: Transmitted</span>
+                      </div>
+                    </div>
+
+                    <div class="wc-stripe-mock-meta-box">
+                      <div class="wc-stripe-mock-meta-title">Metadata Payload (Stripe API)</div>
+                      <div class="wc-stripe-mock-meta-item">
+                        <span class="wc-stripe-mock-meta-key">site_url:</span>
+                        <span class="wc-stripe-mock-meta-val" id="mock-meta-url">"hidden"</span>
+                      </div>
+                      <div class="wc-stripe-mock-meta-item">
+                        <span class="wc-stripe-mock-meta-key">site_name:</span>
+                        <span class="wc-stripe-mock-meta-val" id="mock-meta-store">"BEKAPAINT LIMITED"</span>
+                      </div>
+                      <div class="wc-stripe-mock-meta-item">
+                        <span class="wc-stripe-mock-meta-key">customer_name:</span>
+                        <span class="wc-stripe-mock-meta-val" id="mock-meta-cust">"Sarah Jenkins"</span>
+                      </div>
+                      <div class="wc-stripe-mock-meta-item">
+                        <span class="wc-stripe-mock-meta-key">customer_email:</span>
+                        <span class="wc-stripe-mock-meta-val" id="mock-meta-email">"sarah@example.com"</span>
+                      </div>
+                      <div class="wc-stripe-mock-meta-item">
+                        <span class="wc-stripe-mock-meta-key">order_id:</span>
+                        <span class="wc-stripe-mock-meta-val">"1042"</span>
+                      </div>
+                    </div>
+
+                    <div class="wc-stripe-mock-footer" id="mock-footer-note">
+                      Turn the master switch to ON to activate the cloaking rules.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
         </div>
-      </section>
-
+      </main>
     </div>
-  </main>
+  </div>
 
-  <!-- Modal: License & Activation Key Details -->
+  <!-- ========================================================================
+       MODAL 1: License & Activation Key Details (With Reliable Close Handlers)
+       ======================================================================== -->
   <div id="license-modal" class="modal-overlay" style="display: none;">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title">🔑 Your License & Plugin Activation</h3>
-        <button onclick="UserApp.closeLicenseModal()" style="background: none; border: none; font-size: 18px; cursor: pointer;">✕</button>
+        <h3 class="modal-title">🔑 Your License &amp; Plugin Activation</h3>
+        <button type="button" id="modal-close-x" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); padding: 4px;">✕</button>
       </div>
       <div>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
           Use your account email and activation key to activate the Shield Pro Stripe plugin on any WordPress website.
         </p>
 
-        <div class="form-group">
-          <label class="form-label">Activation Email</label>
+        <div class="wc-stripe-field-group">
+          <label class="wc-stripe-field-label">Activation Email</label>
           <div style="display: flex; gap: 8px;">
-            <input type="text" id="modal-email-val" class="form-control" readonly>
-            <button class="btn btn-secondary btn-sm" onclick="UserApp.copyText('modal-email-val')">Copy</button>
+            <input type="text" id="modal-email-val" class="wc-stripe-input" readonly>
+            <button type="button" class="btn-secondary btn-sm" onclick="UserApp.copyText('modal-email-val')">Copy</button>
           </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">License Key</label>
+        <div class="wc-stripe-field-group">
+          <label class="wc-stripe-field-label">License Key</label>
           <div style="display: flex; gap: 8px;">
-            <input type="text" id="modal-key-val" class="form-control" style="font-family: monospace; font-weight: 700; color: var(--primary);" readonly>
-            <button class="btn btn-secondary btn-sm" onclick="UserApp.copyText('modal-key-val')">Copy</button>
+            <input type="text" id="modal-key-val" class="wc-stripe-input" style="font-family: var(--font-mono); font-weight: 700; color: var(--primary);" readonly>
+            <button type="button" class="btn-secondary btn-sm" onclick="UserApp.copyText('modal-key-val')">Copy</button>
           </div>
         </div>
 
-        <div style="background: var(--bg-subtle); border: 1px solid var(--border-color); padding: 14px; border-radius: var(--radius); margin-top: 16px; font-size: 12px;">
-          <h4 style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">How to activate on WordPress:</h4>
+        <div style="background: #f8fafc; border: 1px solid var(--border-color); padding: 16px; border-radius: 10px; margin-top: 18px; font-size: 12.5px;">
+          <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--text-main);">How to activate in WordPress:</h4>
           <ol style="padding-left: 20px; line-height: 1.8; color: var(--text-muted);">
             <li>Go to your WordPress Admin &gt; <strong>WooCommerce &gt; Settings &gt; Payments &gt; Stripe</strong>.</li>
             <li>In the <strong>Activation Gate</strong>, paste your Email and License Key.</li>
-            <li>Click <strong>Activate & Connect</strong>.</li>
-            <li>Your website will instantly connect to this portal and show up as a browser tab!</li>
+            <li>Click <strong>Activate &amp; Connect</strong>.</li>
+            <li>Your website will instantly connect to this portal and show up in your sidebar!</li>
           </ol>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-primary" onclick="UserApp.closeLicenseModal()">Done</button>
+        <button type="button" id="modal-close-btn" class="btn-primary">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL 2: Configure Stripe Connection & Webhook Modal
+       ======================================================================== -->
+  <div id="configure-connection-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content" style="max-width: 580px;">
+      <div class="modal-header">
+        <h3 class="modal-title">⚡ Configure Stripe Connection</h3>
+        <button type="button" id="conn-modal-close-x" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); padding: 4px;">✕</button>
+      </div>
+      <div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.5;">
+          Update webhook signing secret and Stripe API keys for the connected store: <strong id="conn-store-name">Store</strong>.
+        </p>
+
+        <div class="wc-stripe-field-group">
+          <label class="wc-stripe-field-label">Webhook Destination URL</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="conn-webhook-url" class="wc-stripe-input" readonly style="font-family: var(--font-mono); font-size: 12px;">
+            <button type="button" class="btn-secondary btn-sm" onclick="UserApp.copyText('conn-webhook-url')">Copy</button>
+          </div>
+          <p class="wc-stripe-field-help">Create an endpoint in Stripe Dashboard &gt; Developers &gt; Webhooks with this URL.</p>
+        </div>
+
+        <div class="wc-stripe-field-group">
+          <label class="wc-stripe-field-label" for="conn-webhook-secret">Webhook Signing Secret</label>
+          <input type="text" id="conn-webhook-secret" class="wc-stripe-input" placeholder="whsec_..." style="font-family: var(--font-mono);">
+          <p class="wc-stripe-field-help">Used to verify the cryptographic signature of incoming charge &amp; refund events.</p>
+        </div>
+
+        <div class="wc-stripe-field-group">
+          <label class="wc-stripe-field-label" for="conn-publishable-key">Stripe Publishable Key</label>
+          <input type="text" id="conn-publishable-key" class="wc-stripe-input" placeholder="pk_live_... or pk_test_..." style="font-family: var(--font-mono);">
+        </div>
+
+        <div class="wc-stripe-field-group">
+          <label class="wc-stripe-field-label" for="conn-secret-key">Stripe Secret Key</label>
+          <input type="password" id="conn-secret-key" class="wc-stripe-input" placeholder="sk_live_... or sk_test_..." style="font-family: var(--font-mono);">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="conn-modal-cancel-btn" class="btn-secondary">Cancel</button>
+        <button type="button" id="conn-modal-save-btn" class="btn-primary">Save &amp; Apply</button>
       </div>
     </div>
   </div>

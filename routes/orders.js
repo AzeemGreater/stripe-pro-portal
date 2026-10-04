@@ -10,10 +10,10 @@ const { authMiddleware } = require('../middleware/auth');
 const { fetchOrders, fetchOrderStats } = require('../services/woocommerce');
 
 /**
- * GET /api/sites/:id/orders
+ * GET /api/sites/:id/orders or /api/orders/:id
  * Fetch WooCommerce orders for a specific connected site
  */
-router.get('/:id/orders', authMiddleware, async (req, res) => {
+router.get(['/:id/orders', '/:id'], authMiddleware, async (req, res) => {
   const db = getDb();
   const siteId = req.params.id;
 
@@ -65,10 +65,10 @@ router.get('/:id/orders', authMiddleware, async (req, res) => {
 });
 
 /**
- * GET /api/sites/:id/order-stats
+ * GET /api/sites/:id/order-stats or /api/orders/:id/order-stats
  * Fetch WooCommerce order metrics (revenue, counts)
  */
-router.get('/:id/order-stats', authMiddleware, async (req, res) => {
+router.get(['/:id/order-stats', '/:id/stats'], authMiddleware, async (req, res) => {
   const db = getDb();
   const siteId = req.params.id;
 

@@ -336,10 +336,20 @@ router.get('/logs', (req, res) => {
 
   return res.json({
     success: true,
-    logs: logs.map(l => ({
-      ...l,
-      details: l.details ? JSON.parse(l.details) : null,
-    })),
+    logs: logs.map(l => {
+      let parsedDetails = null;
+      if (l.details) {
+        try {
+          parsedDetails = typeof l.details === 'string' ? JSON.parse(l.details) : l.details;
+        } catch {
+          parsedDetails = l.details;
+        }
+      }
+      return {
+        ...l,
+        details: parsedDetails,
+      };
+    }),
     total,
     page: Number(page),
     totalPages: Math.ceil(total / Number(limit)),

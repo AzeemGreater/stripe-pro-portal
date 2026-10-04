@@ -9,7 +9,7 @@ const { getDb } = require('../database/db');
 const { authMiddleware } = require('../middleware/auth');
 const { encrypt, decrypt } = require('../services/encryption');
 const { logActivity, getClientIp } = require('../services/logger');
-const { fetchStatus, fetchAnalytics } = require('../services/wordpress');
+const { fetchStatus, fetchAnalytics, disconnectRemoteSite } = require('../services/wordpress');
 
 /**
  * POST /api/sites/register
@@ -420,6 +420,65 @@ router.get('/:id/analytics', authMiddleware, async (req, res) => {
       },
     });
   }
+});
+
+/**
+ * DELETE /api/sites/:id
+ * Disconnect a site:
+ * 1. Call remote WordPress plugin to disable Stripe gateway and deactivate license
+ * 2. Decrement current_activations on license_keys table
+ * 3. Delete site record from connected_sites
+ * 4. Log activity
+ */
+router.delete('/:id', authMiddleware, async (req, res) => {
+  const db = getDb();
+  const siteId = req.params.id;
+
+  const site = db.prepare('SELECT * FROM connected_sites WHERE id = ?').get(siteId);
+  if (!site) return res.status(404).json({ error: 'Site not found' });
+
+  if (req.actor.role !== 'admin' && site.user_id !== req.actor.id) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  // 1. Attempt to call remote WordPress plugin to disable Stripe & deactivate license
+  let remoteSuccess = false;
+  let remoteMessage = '';
+  try {
+    const wpRes = await disconnectRemoteSite(site.site_url, site.site_secret_token);
+    if (wpRes && wpRes.success) {
+      remoteSuccess = true;
+      remoteMessage = 'Remote WordPress Stripe disabled and license deactivated.';
+    }
+  } catch (err) {
+    console.warn(`Remote WordPress disconnect for ${site.domain} returned: ${err.message}. Proceeding with portal removal.`);
+    remoteMessage = `Remote site was unreachable (${err.message}), but portal record has been removed.`;
+  }
+
+  // 2. Decrement license activations
+  if (site.license_key_id) {
+    db.prepare('UPDATE license_keys SET current_activations = MAX(0, current_activations - 1) WHERE id = ?').run(site.license_key_id);
+  }
+
+  // 3. Delete site from connected_sites
+  db.prepare('DELETE FROM connected_sites WHERE id = ?').run(siteId);
+
+  // 4. Log activity
+  logActivity({
+    actorType: req.actor.role === 'admin' ? 'admin' : 'user',
+    actorId: req.actor.id,
+    actorEmail: req.actor.email,
+    siteId: parseInt(siteId, 10),
+    action: 'site.disconnected',
+    details: { domain: site.domain, remoteSuccess, remoteMessage },
+    ip: req.ip,
+  });
+
+  return res.json({
+    success: true,
+    message: `Site ${site.domain} disconnected. Stripe gateway disabled in WordPress and license deactivated.`,
+    remote_success: remoteSuccess,
+  });
 });
 
 module.exports = router;

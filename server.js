@@ -69,6 +69,8 @@ app.use('/api/auth/login', authLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/license', licenseRoutes);
 app.use('/api/sites', sitesRoutes);
+app.use('/api/sites', settingsRoutes);
+app.use('/api/sites', ordersRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/orders', ordersRoutes);
 app.use('/api/admin', adminRoutes);
@@ -109,14 +111,28 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start listening
-const server = app.listen(PORT, () => {
-  console.log(`===============================================`);
-  console.log(`🛡️  Shield Pro Portal running on port ${PORT}`);
-  console.log(`🌐 Local URL: http://localhost:${PORT}`);
-  console.log(`🌐 Production URL: ${process.env.PORTAL_URL || 'https://stripe.azeemgreater.com'}`);
-  console.log(`📅 Started at: ${new Date().toLocaleString()}`);
-  console.log(`===============================================`);
-});
+// Start listening if run directly
+let server = null;
+if (require.main === module) {
+  server = app.listen(PORT, () => {
+    console.log(`===============================================`);
+    console.log(`🛡️  Shield Pro Portal running on port ${PORT}`);
+    console.log(`🌐 Local URL: http://localhost:${PORT}`);
+    console.log(`🌐 Production URL: ${process.env.PORTAL_URL || 'https://stripe.azeemgreater.com'}`);
+    console.log(`📅 Started at: ${new Date().toLocaleString()}`);
+    console.log(`===============================================`);
+  });
+
+  // Graceful shutdown
+  const shutdown = () => {
+    console.log('Shutting down server gracefully...');
+    server.close(() => {
+      console.log('Server terminated.');
+      process.exit(0);
+    });
+  };
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
+}
 
 module.exports = { app, server };

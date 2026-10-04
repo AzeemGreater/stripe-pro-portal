@@ -11,10 +11,10 @@ const { logActivity, getClientIp } = require('../services/logger');
 const { fetchSettings, pushSettings } = require('../services/wordpress');
 
 /**
- * GET /api/sites/:id/settings
+ * GET /api/sites/:id/settings or /api/settings/:id
  * Fetch current Stripe plugin settings from the remote WordPress website
  */
-router.get('/:id/settings', authMiddleware, async (req, res) => {
+router.get(['/:id/settings', '/:id'], authMiddleware, async (req, res) => {
   const db = getDb();
   const siteId = req.params.id;
 
@@ -57,6 +57,10 @@ router.get('/:id/settings', authMiddleware, async (req, res) => {
           store_name: site.site_name || 'BEKAPAINT LIMITED',
           site_url: 'hidden',
           order_description_template: '{store_name} - order {order_number}',
+          statement_descriptor_suffix: 'BEKAPAINT',
+          mask_level3: 'no',
+          mask_customer_pii: 'no',
+          strip_shipping: 'no',
         },
       },
     });
@@ -64,10 +68,10 @@ router.get('/:id/settings', authMiddleware, async (req, res) => {
 });
 
 /**
- * POST /api/sites/:id/settings
+ * POST /api/sites/:id/settings or /api/settings/:id
  * Push new plugin settings to remote WordPress site
  */
-router.post('/:id/settings', authMiddleware, async (req, res) => {
+router.post(['/:id/settings', '/:id'], authMiddleware, async (req, res) => {
   const db = getDb();
   const siteId = req.params.id;
   const newSettings = req.body;

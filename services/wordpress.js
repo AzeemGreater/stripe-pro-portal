@@ -112,4 +112,31 @@ async function fetchAnalytics(siteUrl, secretToken, range = '30d') {
   return response.json();
 }
 
-module.exports = { fetchSettings, pushSettings, fetchStatus, fetchAnalytics };
+/**
+ * Notify remote WordPress site to deactivate license and disable Stripe gateway
+ * @param {string} siteUrl - Site URL
+ * @param {string} secretToken - Site secret token
+ * @returns {Promise<object>}
+ */
+async function disconnectRemoteSite(siteUrl, secretToken) {
+  const url = `${siteUrl.replace(/\/$/, '')}/wp-json/shield/v1/disconnect`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'X-Shield-Token': secretToken,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    signal: AbortSignal.timeout(10000),
+  });
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => '');
+    throw new Error(`Disconnect request failed ${response.status}: ${text}`);
+  }
+
+  return response.json();
+}
+
+module.exports = { fetchSettings, pushSettings, fetchStatus, fetchAnalytics, disconnectRemoteSite };
