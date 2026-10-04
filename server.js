@@ -121,28 +121,27 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start listening if run directly
-let server = null;
-if (require.main === module) {
-  server = app.listen(PORT, () => {
-    console.log(`===============================================`);
-    console.log(`🛡️  Shield Pro Portal running on port ${PORT}`);
-    console.log(`🌐 Local URL: http://localhost:${PORT}`);
-    console.log(`🌐 Production URL: ${process.env.PORTAL_URL || 'https://neoxds.com'}`);
-    console.log(`📅 Started at: ${new Date().toLocaleString()}`);
-    console.log(`===============================================`);
-  });
+// Phusion Passenger / Hostinger requires app.listen() to be called directly without require.main guard
+const listenPort = process.env.PORT || 3000;
+const server = app.listen(listenPort, () => {
+  console.log(`===============================================`);
+  console.log(`🛡️  Shield Pro Portal running on port ${listenPort}`);
+  console.log(`🌐 Local URL: http://localhost:${listenPort}`);
+  console.log(`🌐 Production URL: ${process.env.PORTAL_URL || 'https://neoxds.com'}`);
+  console.log(`📅 Started at: ${new Date().toLocaleString()}`);
+  console.log(`===============================================`);
+});
 
-  // Graceful shutdown
-  const shutdown = () => {
-    console.log('Shutting down server gracefully...');
-    server.close(() => {
-      console.log('Server terminated.');
-      process.exit(0);
-    });
-  };
-  process.on('SIGTERM', shutdown);
-  process.on('SIGINT', shutdown);
-}
+// Graceful shutdown
+const shutdown = () => {
+  console.log('Shutting down server gracefully...');
+  server.close(() => {
+    console.log('Server terminated.');
+    process.exit(0);
+  });
+};
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
 
 module.exports = { app, server };
+
