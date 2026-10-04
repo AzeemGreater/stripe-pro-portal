@@ -1,9 +1,14 @@
 # Shield Pro Portal - .gitignore
 node_modules/
 .env
-database/portal.db*
+*.db
+*.db-wal
+*.db-shm
+*.sqlite*
 database/*.db*
 database/*.sqlite*
+dist/
+build/
 *.log
 .DS_Store
 Thumbs.db
