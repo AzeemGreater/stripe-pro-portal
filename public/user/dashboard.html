@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Dashboard - Shield Pro Portal</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%3E<text y=%2226%22 font-size=%2224%22>🛡️</text></svg>">
+</head>
+<body>
+  <!-- Top Global Header -->
+  <header class="portal-header">
+    <div class="portal-brand">
+      <span style="font-size: 20px;">🛡️</span>
+      <span>Shield Pro</span>
+      <span class="portal-brand-badge">Client Portal</span>
+    </div>
+
+    <div class="portal-nav-user">
+      <div class="user-pill">
+        <span>👤</span>
+        <span id="user-display-name">Loading...</span>
+        <span style="color: var(--text-light);">•</span>
+        <span id="user-site-quota" style="color: var(--text-muted); font-size: 12px;">0/10 Sites</span>
+      </div>
+
+      <button id="show-license-btn" class="btn btn-secondary btn-sm" title="View your activation credentials">
+        🔑 License & Activation
+      </button>
+
+      <button id="logout-btn" class="btn btn-secondary btn-sm">
+        Sign Out
+      </button>
+    </div>
+  </header>
+
+  <!-- Browser-Styled Tabs Bar (For Connected Websites) -->
+  <div class="browser-tab-bar" id="browser-tabs-bar">
+    <!-- Dynamically injected tabs for each connected website -->
+    <button class="browser-tab-add" id="add-site-tab-btn" title="Connect New WordPress Site">
+      +
+    </button>
+  </div>
+
+  <!-- Sub-Navigation for Selected Site (Settings, Transactions, Orders, Advance Tools) -->
+  <div class="sub-nav-bar" id="sub-nav-bar" style="display: none;">
+    <div class="sub-nav-tabs">
+      <button class="sub-tab-btn active" data-subtab="settings">
+        <span>⚙️</span>
+        <span>Settings</span>
+      </button>
+      <button class="sub-tab-btn" data-subtab="dashboard">
+        <span>📊</span>
+        <span>Transactions Dashboard</span>
+        <span class="badge-pill">Analytics</span>
+      </button>
+      <button class="sub-tab-btn" data-subtab="orders">
+        <span>🛒</span>
+        <span>WooCommerce Orders</span>
+      </button>
+      <button class="sub-tab-btn" data-subtab="advance_tools">
+        <span>🔧</span>
+        <span>Advance Tools</span>
+        <span class="badge-pill" style="background: #ecfdf5; color: #10b981;">Pro</span>
+      </button>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span id="site-status-indicator" class="badge badge-success">Online</span>
+      <button id="refresh-site-btn" class="btn btn-secondary btn-sm" title="Ping remote WordPress site">
+        🔄 Sync Site
+      </button>
+      <button id="disconnect-site-btn" class="btn btn-secondary btn-sm" style="color: var(--danger); border-color: #fecaca;" title="Disconnect site from portal">
+        Disconnect
+      </button>
+    </div>
+  </div>
+
+  <!-- Main View Area -->
+  <main class="portal-container" id="main-content-area">
+    <!-- Loading State -->
+    <div id="loading-placeholder" style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+      <div style="font-size: 28px; margin-bottom: 12px; animation: spin 1s linear infinite;">⏳</div>
+      <p>Loading your connected websites and configuration...</p>
+    </div>
+
+    <!-- Empty State (No sites connected yet) -->
+    <div id="empty-sites-placeholder" class="portal-card" style="display: none; text-align: center; padding: 50px 24px;">
+      <div style="font-size: 42px; margin-bottom: 16px;">🌐</div>
+      <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">No Connected Websites Yet</h2>
+      <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto 24px auto;">
+        Activate your WordPress Stripe plugin using your account email and activation key. Once activated on your WordPress store, it will automatically appear here as a browser tab!
+      </p>
+      <button class="btn btn-primary" onclick="UserApp.openLicenseModal()">
+        🔑 View Activation Key & Instructions
+      </button>
+    </div>
+
+    <!-- Active Website Management Content -->
+    <div id="site-view-wrapper" style="display: none;">
+      
+      <!-- SUBTAB 1: SETTINGS -->
+      <section id="tab-content-settings" class="tab-pane">
+        <div class="portal-card">
+          <div class="portal-card-header">
+            <div>
+              <h2 class="portal-card-title"><span>⚙️</span> WooCommerce Stripe Gateway Settings</h2>
+              <p class="portal-card-subtitle">Manage payment gateway preferences directly on your WordPress store.</p>
+            </div>
+            <button id="save-settings-btn" class="btn btn-primary">
+              💾 Save Settings to WordPress
+            </button>
+          </div>
+
+          <form id="plugin-settings-form">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+              <div>
+                <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-subtle); padding: 12px; border-radius: var(--radius);">
+                  <div>
+                    <label class="form-label" style="margin-bottom: 2px;">Enable Stripe Gateway</label>
+                    <span class="form-desc">Accept debit & credit card payments at checkout</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="setting-enabled" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; background: #fffbeb; border: 1px solid #fef3c7; padding: 12px; border-radius: var(--radius); margin-top: 14px;">
+                  <div>
+                    <label class="form-label" style="color: #92400e; margin-bottom: 2px;">Test Mode</label>
+                    <span class="form-desc" style="color: #b45309;">Simulate transactions without charging real cards</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="setting-testmode" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+
+                <div class="form-group" style="margin-top: 18px;">
+                  <label class="form-label" for="setting-title">Checkout Gateway Title</label>
+                  <input type="text" id="setting-title" class="form-control" value="Credit / Debit Card (Stripe)">
+                  <span class="form-desc">This controls the title which the user sees during checkout.</span>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="setting-desc">Checkout Description</label>
+                  <textarea id="setting-desc" class="form-control" rows="3">Pay securely with your credit or debit card.</textarea>
+                  <span class="form-desc">Payment method description shown to buyers on checkout page.</span>
+                </div>
+              </div>
+
+              <div>
+                <div class="form-group">
+                  <label class="form-label" for="setting-statement">Statement Descriptor</label>
+                  <input type="text" id="setting-statement" class="form-control" maxlength="22" value="STORE NAME">
+                  <span class="form-desc">Appears on your customer's bank statement (maximum 22 characters).</span>
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-subtle); padding: 12px; border-radius: var(--radius); margin-bottom: 12px;">
+                  <div>
+                    <label class="form-label" style="margin-bottom: 2px;">Capture Charge Immediately</label>
+                    <span class="form-desc">Authorize and capture funds automatically</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="setting-capture" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-subtle); padding: 12px; border-radius: var(--radius); margin-bottom: 12px;">
+                  <div>
+                    <label class="form-label" style="margin-bottom: 2px;">Saved Cards (Tokenization)</label>
+                    <span class="form-desc">Allow returning customers to pay with saved cards</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="setting-savedcards" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-subtle); padding: 12px; border-radius: var(--radius); margin-bottom: 12px;">
+                  <div>
+                    <label class="form-label" style="margin-bottom: 2px;">Inline Credit Card Form</label>
+                    <span class="form-desc">Present compact card inputs directly in checkout</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="setting-inlineform">
+                    <span class="slider"></span>
+                  </label>
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-subtle); padding: 12px; border-radius: var(--radius);">
+                  <div>
+                    <label class="form-label" style="margin-bottom: 2px;">Diagnostic Debug Logging</label>
+                    <span class="form-desc">Save API requests & errors to WooCommerce status logs</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="setting-logging" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- SUBTAB 2: TRANSACTIONS DASHBOARD -->
+      <section id="tab-content-dashboard" class="tab-pane" style="display: none;">
+        <!-- Analytics Header & Filter -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div>
+            <h2 style="font-size: 16px; font-weight: 700;">Stripe Performance & Analytics</h2>
+            <p style="font-size: 12px; color: var(--text-muted);">Real-time financial metrics and payment records for this store.</p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <select id="analytics-range-select" class="form-select" style="width: 140px; padding: 5px 8px;">
+              <option value="24h">Last 24 Hours</option>
+              <option value="7d">Last 7 Days</option>
+              <option value="30d" selected>Last 30 Days</option>
+              <option value="90d">Last 90 Days</option>
+            </select>
+            <button id="refresh-analytics-btn" class="btn btn-secondary btn-sm">Refresh</button>
+          </div>
+        </div>
+
+        <!-- KPI Cards Grid -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Gross Volume</div>
+            <div class="kpi-value" id="kpi-gross-volume">$0.00</div>
+            <div class="kpi-sub">Total payments received</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Net Volume</div>
+            <div class="kpi-value" id="kpi-net-volume" style="color: var(--success);">$0.00</div>
+            <div class="kpi-sub" id="kpi-fees-sub">Fees: $0.00</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Available Balance</div>
+            <div class="kpi-value" id="kpi-available-bal">$0.00</div>
+            <div class="kpi-sub" id="kpi-pending-sub">Pending: $0.00</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Success Rate</div>
+            <div class="kpi-value" id="kpi-success-rate">100%</div>
+            <div class="kpi-sub" id="kpi-success-count">0 successful / 0 failed</div>
+          </div>
+        </div>
+
+        <!-- Analytics Sub-Views (Transactions, Payouts, Disputes, Customers) -->
+        <div class="portal-card" style="padding: 0; overflow: hidden;">
+          <div style="background: var(--bg-subtle); border-bottom: 1px solid var(--border-color); padding: 8px 16px; display: flex; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" id="subtab-tx-btn" onclick="UserApp.switchAnalyticsSubTab('transactions')" style="background: #fff; font-weight: 600;">Charges & Transactions</button>
+            <button class="btn btn-secondary btn-sm" id="subtab-payouts-btn" onclick="UserApp.switchAnalyticsSubTab('payouts')">Bank Payouts</button>
+            <button class="btn btn-secondary btn-sm" id="subtab-disputes-btn" onclick="UserApp.switchAnalyticsSubTab('disputes')">Disputes</button>
+            <button class="btn btn-secondary btn-sm" id="subtab-customers-btn" onclick="UserApp.switchAnalyticsSubTab('customers')">Stripe Customers</button>
+          </div>
+
+          <div id="analytics-table-container" style="padding: 16px;">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- SUBTAB 3: WOOCOMMERCE STORE ORDERS -->
+      <section id="tab-content-orders" class="tab-pane" style="display: none;">
+        <!-- Orders Metric Header -->
+        <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); margin-bottom: 16px;">
+          <div class="kpi-card" style="padding: 12px;">
+            <div class="kpi-label">Store Orders</div>
+            <div class="kpi-value" id="wc-stat-total" style="font-size: 20px;">0</div>
+          </div>
+          <div class="kpi-card" style="padding: 12px;">
+            <div class="kpi-label">Revenue (30d)</div>
+            <div class="kpi-value" id="wc-stat-revenue" style="font-size: 20px; color: var(--success);">$0.00</div>
+          </div>
+          <div class="kpi-card" style="padding: 12px;">
+            <div class="kpi-label">Completed</div>
+            <div class="kpi-value" id="wc-stat-completed" style="font-size: 20px;">0</div>
+          </div>
+          <div class="kpi-card" style="padding: 12px;">
+            <div class="kpi-label">Pending / Processing</div>
+            <div class="kpi-value" id="wc-stat-pending" style="font-size: 20px; color: #d97706;">0</div>
+          </div>
+        </div>
+
+        <div class="portal-card">
+          <div class="portal-card-header">
+            <div>
+              <h2 class="portal-card-title"><span>🛒</span> WooCommerce Store Orders</h2>
+              <p class="portal-card-subtitle">Real-time store purchases processed through your WooCommerce Stripe Gateway.</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <select id="orders-status-filter" class="form-select" style="width: 140px; padding: 4px 8px;">
+                <option value="">All Statuses</option>
+                <option value="completed">Completed</option>
+                <option value="processing">Processing</option>
+                <option value="pending">Pending Payment</option>
+                <option value="on-hold">On Hold</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="refunded">Refunded</option>
+              </select>
+              <button id="refresh-orders-btn" class="btn btn-secondary btn-sm">Refresh Orders</button>
+            </div>
+          </div>
+
+          <div id="wc-keys-warning" style="display: none; background: #fffbeb; border: 1px solid #fde68a; padding: 16px; border-radius: var(--radius); margin-bottom: 16px;">
+            <h4 style="color: #92400e; font-size: 14px; margin-bottom: 4px;">⚠️ WooCommerce REST API Credentials Required</h4>
+            <p style="color: #b45309; font-size: 12px; margin-bottom: 12px;">
+              To fetch live orders directly from this store, generate Read/Write REST API keys in your WordPress Admin (<strong>WooCommerce &gt; Settings &gt; Advanced &gt; REST API</strong>) and enter them below:
+            </p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <input type="text" id="input-wc-ck" class="form-control" placeholder="ck_xxxxxxxxxxxxxxxxxxxxxxxx" style="flex: 1; min-width: 200px;">
+              <input type="password" id="input-wc-cs" class="form-control" placeholder="cs_xxxxxxxxxxxxxxxxxxxxxxxx" style="flex: 1; min-width: 200px;">
+              <button class="btn btn-primary" onclick="UserApp.saveWcKeys()">Save Keys & Load Orders</button>
+            </div>
+          </div>
+
+          <div class="portal-table-wrap">
+            <table class="portal-table">
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Date</th>
+                  <th>Customer</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Payment Method</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="wc-orders-tbody">
+                <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">Loading orders...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SUBTAB 4: ADVANCE TOOLS -->
+      <section id="tab-content-advance_tools" class="tab-pane" style="display: none;">
+        <div class="portal-card">
+          <div class="portal-card-header">
+            <div>
+              <h2 class="portal-card-title"><span>🔧</span> Metadata Customizer & White-Label Suite</h2>
+              <p class="portal-card-subtitle">Control the metadata, store identifier, and charge descriptions passed to Stripe.</p>
+            </div>
+            <button id="save-tools-btn" class="btn btn-primary">
+              💾 Save Metadata Rules
+            </button>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 28px;">
+            <!-- Controls Form -->
+            <div>
+              <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-subtle); padding: 14px; border-radius: var(--radius); margin-bottom: 18px;">
+                <div>
+                  <label class="form-label" style="margin-bottom: 2px;">Enable Custom Stripe Metadata</label>
+                  <span class="form-desc">Override default descriptions on PaymentIntents and Charges</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="tool-meta-enabled">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="tool-store-name">Store Name / Brand Identifier</label>
+                <input type="text" id="tool-store-name" class="form-control" value="BEKAPAINT LIMITED">
+                <span class="form-desc">Replaces default store naming in customer statements and metadata.</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="tool-site-url">Store URL in Stripe Metadata</label>
+                <select id="tool-site-url" class="form-select">
+                  <option value="hidden" selected>Hidden (Maximum Privacy / Shielded)</option>
+                  <option value="send">Send full store domain URL</option>
+                </select>
+                <span class="form-desc">When set to 'Hidden', the origin domain is omitted from Stripe charge logs.</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="tool-desc-template">Order Description Template</label>
+                <input type="text" id="tool-desc-template" class="form-control" value="{store_name} - order {order_number}">
+                <span class="form-desc">Click tags below to insert dynamically into template:</span>
+                
+                <div style="margin-top: 8px;">
+                  <button type="button" class="tag-btn" onclick="UserApp.insertTemplateTag('{store_name}')">{store_name}</button>
+                  <button type="button" class="tag-btn" onclick="UserApp.insertTemplateTag('{order_number}')">{order_number}</button>
+                  <button type="button" class="tag-btn" onclick="UserApp.insertTemplateTag('{customer_name}')">{customer_name}</button>
+                  <button type="button" class="tag-btn" onclick="UserApp.insertTemplateTag('{order_date}')">{order_date}</button>
+                  <button type="button" class="tag-btn" onclick="UserApp.insertTemplateTag('{order_total}')">{order_total}</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live Card Preview -->
+            <div>
+              <div style="font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-main);">
+                👁️ Live Stripe Charge & Receipt Preview
+              </div>
+              <div class="preview-charge-card">
+                <div class="preview-charge-header">
+                  <span>STRIPE PAYMENTINTENT SIMULATION</span>
+                  <span class="badge badge-success">SUCCEEDED</span>
+                </div>
+
+                <div class="preview-charge-row">
+                  <span class="preview-charge-label">Amount</span>
+                  <span class="preview-charge-value">$129.00 USD</span>
+                </div>
+
+                <div class="preview-charge-row">
+                  <span class="preview-charge-label">Statement Brand</span>
+                  <span class="preview-charge-value" id="preview-brand-val">BEKAPAINT LIMITED</span>
+                </div>
+
+                <div class="preview-charge-row">
+                  <span class="preview-charge-label">Order Description</span>
+                  <span class="preview-charge-value" id="preview-desc-val" style="color: var(--primary); font-family: monospace;">BEKAPAINT LIMITED - order 1042</span>
+                </div>
+
+                <div class="preview-charge-row">
+                  <span class="preview-charge-label">Origin Domain</span>
+                  <span class="preview-charge-value" id="preview-url-val" style="color: var(--text-muted);">[Hidden / Omitted]</span>
+                </div>
+
+                <div class="preview-charge-row">
+                  <span class="preview-charge-label">Metadata Tags</span>
+                  <span class="preview-charge-value" style="font-size: 11px;">customer_ref: Sarah Jenkins • id: #1042</span>
+                </div>
+              </div>
+
+              <div style="margin-top: 14px; background: var(--bg-subtle); padding: 12px; border-radius: var(--radius); border: 1px solid var(--border-color); font-size: 12px; color: var(--text-muted);">
+                💡 <strong>Privacy Protection:</strong> Shield Pro sanitizes metadata before it hits Stripe API logs, preventing automated merchant scans from exposing your actual WordPress site URL.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Modal: License & Activation Key Details -->
+  <div id="license-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">🔑 Your License & Plugin Activation</h3>
+        <button onclick="UserApp.closeLicenseModal()" style="background: none; border: none; font-size: 18px; cursor: pointer;">✕</button>
+      </div>
+      <div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+          Use your account email and activation key to activate the Shield Pro Stripe plugin on any WordPress website.
+        </p>
+
+        <div class="form-group">
+          <label class="form-label">Activation Email</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="modal-email-val" class="form-control" readonly>
+            <button class="btn btn-secondary btn-sm" onclick="UserApp.copyText('modal-email-val')">Copy</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">License Key</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="modal-key-val" class="form-control" style="font-family: monospace; font-weight: 700; color: var(--primary);" readonly>
+            <button class="btn btn-secondary btn-sm" onclick="UserApp.copyText('modal-key-val')">Copy</button>
+          </div>
+        </div>
+
+        <div style="background: var(--bg-subtle); border: 1px solid var(--border-color); padding: 14px; border-radius: var(--radius); margin-top: 16px; font-size: 12px;">
+          <h4 style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">How to activate on WordPress:</h4>
+          <ol style="padding-left: 20px; line-height: 1.8; color: var(--text-muted);">
+            <li>Go to your WordPress Admin &gt; <strong>WooCommerce &gt; Settings &gt; Payments &gt; Stripe</strong>.</li>
+            <li>In the <strong>Activation Gate</strong>, paste your Email and License Key.</li>
+            <li>Click <strong>Activate & Connect</strong>.</li>
+            <li>Your website will instantly connect to this portal and show up as a browser tab!</li>
+          </ol>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="UserApp.closeLicenseModal()">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script src="/js/user-dashboard.js"></script>
+</body>
+</html>

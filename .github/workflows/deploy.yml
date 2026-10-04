@@ -1,0 +1,44 @@
+name: Deploy Shield Pro Portal to Hostinger
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Hostinger via FTP
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 📦 Install Production Dependencies
+        run: |
+          npm ci --omit=dev || npm install --omit=dev
+
+      - name: 🚀 Sync Files to Hostinger Web Server
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.HOSTINGER_FTP_HOST }}
+          username: ${{ secrets.HOSTINGER_FTP_USER }}
+          password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+          protocol: ftps
+          port: ${{ secrets.HOSTINGER_FTP_PORT || 21 }}
+          local-dir: ./
+          server-dir: ${{ secrets.HOSTINGER_SERVER_DIR || '/public_html/' }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/database/portal.db*
+            **/.env
+            **/scratch/**
+            **/tests/**

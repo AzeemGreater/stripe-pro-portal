@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Console - Shield Pro Portal</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%3E<text y=%2226%22 font-size=%2224%22>🛡️</text></svg>">
+</head>
+<body>
+  <!-- Top Admin Header -->
+  <header class="portal-header">
+    <div class="portal-brand">
+      <span style="font-size: 20px;">🛡️</span>
+      <span>Shield Pro</span>
+      <span class="portal-brand-badge" style="background: #0f172a;">Super Admin</span>
+    </div>
+
+    <div class="portal-nav-user">
+      <div class="user-pill" style="background: #f8fafc;">
+        <span style="color: var(--primary);">👑</span>
+        <span id="admin-email-display">admin@azeemgreater.com</span>
+      </div>
+
+      <a href="/user/dashboard.html" class="btn btn-secondary btn-sm" title="Preview client user dashboard">
+        Switch to Client View
+      </a>
+
+      <button id="admin-logout-btn" class="btn btn-secondary btn-sm">
+        Sign Out
+      </button>
+    </div>
+  </header>
+
+  <!-- Admin Main Navigation Bar -->
+  <div class="sub-nav-bar" style="background: #ffffff; border-bottom: 2px solid var(--border-color);">
+    <div class="sub-nav-tabs">
+      <button class="sub-tab-btn active" data-nav="overview">
+        <span>📈</span>
+        <span>Overview</span>
+      </button>
+      <button class="sub-tab-btn" data-nav="users">
+        <span>👥</span>
+        <span>Users & Quotas</span>
+        <span class="badge-pill" id="badge-users-count">0</span>
+      </button>
+      <button class="sub-tab-btn" data-nav="keys">
+        <span>🔑</span>
+        <span>License Keys</span>
+        <span class="badge-pill" id="badge-keys-count">0</span>
+      </button>
+      <button class="sub-tab-btn" data-nav="sites">
+        <span>🌐</span>
+        <span>All Connected Sites</span>
+        <span class="badge-pill" id="badge-sites-count">0</span>
+      </button>
+      <button class="sub-tab-btn" data-nav="logs">
+        <span>📋</span>
+        <span>Audit Logs</span>
+      </button>
+    </div>
+
+    <div>
+      <span style="font-size: 12px; color: var(--text-muted);">Hostinger Node.js Engine Active</span>
+    </div>
+  </div>
+
+  <!-- Admin Container -->
+  <main class="portal-container">
+    
+    <!-- 1. OVERVIEW SECTION -->
+    <section id="admin-section-overview" class="admin-pane">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Total Users</div>
+          <div class="kpi-value" id="stat-total-users">0</div>
+          <div class="kpi-sub" id="stat-active-users">0 active accounts</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Connected Websites</div>
+          <div class="kpi-value" id="stat-total-sites" style="color: var(--primary);">0</div>
+          <div class="kpi-sub" id="stat-active-sites">0 active plugins</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">License Keys</div>
+          <div class="kpi-value" id="stat-total-keys">0</div>
+          <div class="kpi-sub" id="stat-active-keys">0 valid keys</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Logged Audit Events</div>
+          <div class="kpi-value" id="stat-total-logs">0</div>
+          <div class="kpi-sub">Full tamper-evident trail</div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 24px;">
+        <!-- Quick Action Box -->
+        <div class="portal-card">
+          <div class="portal-card-header">
+            <h3 class="portal-card-title">⚡ Quick Management Actions</h3>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <button class="btn btn-primary" onclick="AdminApp.openNewUserModal()">
+              ➕ Create New Portal User & Generate Key
+            </button>
+            <button class="btn btn-secondary" onclick="AdminApp.openNewKeyModal()">
+              🔑 Issue License Key to Existing User
+            </button>
+            <button class="btn btn-secondary" onclick="AdminApp.switchNav('sites')">
+              🌐 View All Connected Websites
+            </button>
+          </div>
+        </div>
+
+        <!-- System Information -->
+        <div class="portal-card">
+          <div class="portal-card-header">
+            <h3 class="portal-card-title">🛡️ System Environment</h3>
+          </div>
+          <table class="portal-table" style="font-size: 12px;">
+            <tr>
+              <td><strong>Architecture</strong></td>
+              <td>Express.js + SQLite3 WAL Mode</td>
+            </tr>
+            <tr>
+              <td><strong>Hostinger Gateway</strong></td>
+              <td><code>stripe.azeemgreater.com</code></td>
+            </tr>
+            <tr>
+              <td><strong>WordPress Activation Upstream</strong></td>
+              <td><code>https://azeemgreater.com</code></td>
+            </tr>
+            <tr>
+              <td><strong>Security Standard</strong></td>
+              <td>JWT Bearer + AES-256 GCM Key Vault</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. USERS MANAGEMENT SECTION -->
+    <section id="admin-section-users" class="admin-pane" style="display: none;">
+      <div class="portal-card">
+        <div class="portal-card-header">
+          <div>
+            <h2 class="portal-card-title"><span>👥</span> User Accounts & Website Quotas</h2>
+            <p class="portal-card-subtitle">Manage registered clients, their activation limits, and access status.</p>
+          </div>
+          <button class="btn btn-primary" onclick="AdminApp.openNewUserModal()">
+            ➕ Add New User
+          </button>
+        </div>
+
+        <div class="portal-table-wrap">
+          <table class="portal-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name / Email</th>
+                <th>Connected Sites</th>
+                <th>Site Quota</th>
+                <th>Keys</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Last Login</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-users-tbody">
+              <tr><td colspan="9" style="text-align: center; padding: 30px; color: var(--text-muted);">Loading users...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. LICENSE KEYS SECTION -->
+    <section id="admin-section-keys" class="admin-pane" style="display: none;">
+      <div class="portal-card">
+        <div class="portal-card-header">
+          <div>
+            <h2 class="portal-card-title"><span>🔑</span> License Keys & Plugin Activations</h2>
+            <p class="portal-card-subtitle">All active, suspended, and issued plugin activation keys.</p>
+          </div>
+          <button class="btn btn-primary" onclick="AdminApp.openNewKeyModal()">
+            ➕ Generate New Key
+          </button>
+        </div>
+
+        <div class="portal-table-wrap">
+          <table class="portal-table">
+            <thead>
+              <tr>
+                <th>License Key</th>
+                <th>Assigned User</th>
+                <th>Activations</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Notes</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-keys-tbody">
+              <tr><td colspan="7" style="text-align: center; padding: 30px; color: var(--text-muted);">Loading license keys...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. CONNECTED SITES MONITOR SECTION -->
+    <section id="admin-section-sites" class="admin-pane" style="display: none;">
+      <div class="portal-card">
+        <div class="portal-card-header">
+          <div>
+            <h2 class="portal-card-title"><span>🌐</span> All Connected WordPress Websites</h2>
+            <p class="portal-card-subtitle">Live status of every store running your custom Shield Pro Stripe plugin.</p>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="AdminApp.loadSites()">
+            🔄 Refresh List
+          </button>
+        </div>
+
+        <div class="portal-table-wrap">
+          <table class="portal-table">
+            <thead>
+              <tr>
+                <th>Domain / Store</th>
+                <th>User Account</th>
+                <th>License Key</th>
+                <th>Plugin Version</th>
+                <th>WP / WC Version</th>
+                <th>Status</th>
+                <th>Last Sync</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-sites-tbody">
+              <tr><td colspan="8" style="text-align: center; padding: 30px; color: var(--text-muted);">Loading sites...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. AUDIT LOGS SECTION -->
+    <section id="admin-section-logs" class="admin-pane" style="display: none;">
+      <div class="portal-card">
+        <div class="portal-card-header">
+          <div>
+            <h2 class="portal-card-title"><span>📋</span> Real-time Audit & Activity Log</h2>
+            <p class="portal-card-subtitle">Complete chronological record of all logins, activations, and config changes.</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="log-search-input" class="form-control" placeholder="Search action or email..." style="width: 220px; padding: 4px 8px;">
+            <button class="btn btn-secondary btn-sm" onclick="AdminApp.loadLogs()">Filter</button>
+          </div>
+        </div>
+
+        <div class="portal-table-wrap">
+          <table class="portal-table">
+            <thead>
+              <tr>
+                <th>Date / Time</th>
+                <th>Actor</th>
+                <th>Action</th>
+                <th>Details</th>
+                <th>IP Address</th>
+              </tr>
+            </thead>
+            <tbody id="admin-logs-tbody">
+              <tr><td colspan="5" style="text-align: center; padding: 30px; color: var(--text-muted);">Loading audit logs...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: Create New User -->
+  <div id="modal-create-user" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">➕ Create New Portal User</h3>
+        <button onclick="AdminApp.closeModals()" style="background: none; border: none; font-size: 18px; cursor: pointer;">✕</button>
+      </div>
+      <form id="form-create-user">
+        <div class="form-group">
+          <label class="form-label" for="new-user-email">Account Email</label>
+          <input type="email" id="new-user-email" class="form-control" placeholder="client@store.com" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="new-user-password">Initial Password</label>
+          <input type="password" id="new-user-password" class="form-control" placeholder="Min. 6 characters" required minlength="6">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="new-user-name">Client Name</label>
+          <input type="text" id="new-user-name" class="form-control" placeholder="e.g. John Doe / Brand Name">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="new-user-maxsites">Max Allowed Websites (Quota)</label>
+          <input type="number" id="new-user-maxsites" class="form-control" value="10" min="1" max="1000">
+        </div>
+
+        <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="new-user-auto-key" checked>
+          <label for="new-user-auto-key" style="font-size: 13px; cursor: pointer;">
+            Automatically generate a <code>SHIELD-XXXX</code> license key for this user
+          </label>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="AdminApp.closeModals()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-new-user">Create User Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Issue New License Key -->
+  <div id="modal-create-key" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">🔑 Generate New License Key</h3>
+        <button onclick="AdminApp.closeModals()" style="background: none; border: none; font-size: 18px; cursor: pointer;">✕</button>
+      </div>
+      <form id="form-create-key">
+        <div class="form-group">
+          <label class="form-label" for="key-user-select">Assign to User</label>
+          <select id="key-user-select" class="form-select" required></select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="key-max-activations">Max Allowed Activations</label>
+          <input type="number" id="key-max-activations" class="form-control" value="10" min="1" max="1000">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="key-notes">Notes / Plan Reference</label>
+          <input type="text" id="key-notes" class="form-control" placeholder="e.g. Unlimited Agency Plan / Pro Pack">
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="AdminApp.closeModals()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-new-key">Generate Key</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Edit User -->
+  <div id="modal-edit-user" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">✏️ Edit User Account</h3>
+        <button onclick="AdminApp.closeModals()" style="background: none; border: none; font-size: 18px; cursor: pointer;">✕</button>
+      </div>
+      <form id="form-edit-user">
+        <input type="hidden" id="edit-user-id">
+
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="edit-user-email" class="form-control" readonly style="background: var(--bg-subtle);">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="edit-user-name">Client Name</label>
+          <input type="text" id="edit-user-name" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="edit-user-maxsites">Max Websites Limit</label>
+          <input type="number" id="edit-user-maxsites" class="form-control" min="1" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="edit-user-status">Account Status</label>
+          <select id="edit-user-status" class="form-select">
+            <option value="active">Active (Access allowed)</option>
+            <option value="suspended">Suspended (Access blocked)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="edit-user-password">Reset Password (leave blank to keep unchanged)</label>
+          <input type="password" id="edit-user-password" class="form-control" placeholder="New password (optional)">
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="AdminApp.closeModals()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script src="/admin/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Shield Pro Portal</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%3E<text y=%2226%22 font-size=%2224%22>🛡️</text></svg>">
+</head>
+<body class="login-body">
+  <div class="login-card">
+    <div class="login-logo">
+      <span>🛡️</span>
+      <span>Shield Pro Portal</span>
+      <span class="portal-brand-badge">Suite</span>
+    </div>
+    <p class="login-desc">Sign in to manage your connected WooCommerce Stripe websites and gateway configurations.</p>
+
+    <div id="login-error" style="display: none; background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; padding: 10px 12px; border-radius: var(--radius); font-size: 13px; margin-bottom: 18px;"></div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label class="form-label" for="email">Account Email</label>
+        <input type="email" id="email" class="form-control" placeholder="name@domain.com" required autocomplete="username" autofocus>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input type="password" id="password" class="form-control" placeholder="••••••••••••" required autocomplete="current-password">
+      </div>
+
+      <div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+        <label style="font-size: 12px; color: var(--text-muted); display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+          <input type="checkbox" id="remember-me" checked> Keep me logged in
+        </label>
+      </div>
+
+      <button type="submit" id="submit-btn" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 14px;">
+        Sign In to Portal
+      </button>
+    </form>
+
+    <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border-color); text-align: center; font-size: 12px; color: var(--text-muted);">
+      Shield Pro Gateway Management Suite • Hostinger Edition
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    // Redirect if already authenticated
+    if (Auth.isAuthenticated()) {
+      if (Auth.isAdmin()) {
+        window.location.href = '/admin/dashboard.html';
+      } else {
+        window.location.href = '/user/dashboard.html';
+      }
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('session_expired')) {
+      const errBox = document.getElementById('login-error');
+      errBox.innerText = 'Your session has expired. Please sign in again.';
+      errBox.style.display = 'block';
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errBox = document.getElementById('login-error');
+      const submitBtn = document.getElementById('submit-btn');
+      
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      errBox.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Signing in...';
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Login failed. Please check your credentials.');
+        }
+
+        // Store session
+        Auth.setSession(data.token, data.user);
+
+        // Redirect based on role
+        if (data.user.role === 'admin') {
+          window.location.href = '/admin/dashboard.html';
+        } else {
+          window.location.href = '/user/dashboard.html';
+        }
+      } catch (err) {
+        errBox.innerText = err.message;
+        errBox.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Sign In to Portal';
+      }
+    });
+  </script>
+</body>
+</html>
