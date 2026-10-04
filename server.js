@@ -85,6 +85,16 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Plugin download endpoint
+app.get(['/download/plugin', '/api/plugin/download'], (req, res) => {
+  const pluginZip = path.join(__dirname, 'woocommerce-gateway-stripe-portal-ready.zip');
+  const fs = require('fs');
+  if (fs.existsSync(pluginZip)) {
+    return res.download(pluginZip, 'woocommerce-gateway-stripe.zip');
+  }
+  return res.status(404).send('Plugin zip not found on server.');
+});
+
 // Serve frontend static files from /public
 app.use(express.static(path.join(__dirname, 'public')));
 
