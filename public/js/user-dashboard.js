@@ -735,9 +735,9 @@ const UserApp = {
 
       document.getElementById('tool-meta-enabled').checked = meta.enabled === 'yes' || meta.enabled === true;
       document.getElementById('tool-site-url').value = meta.site_url || 'hidden';
-      document.getElementById('tool-store-name').value = meta.store_name || this.activeSite.site_name || 'BEKAPAINT LIMITED';
+      document.getElementById('tool-store-name').value = meta.store_name || this.activeSite.site_name || this.activeSite.domain || '';
       document.getElementById('tool-desc-template').value = meta.order_description_template || '{store_name} - order {order_number}';
-      document.getElementById('tool-statement-suffix').value = meta.statement_descriptor_suffix || 'BEKAPAINT';
+      document.getElementById('tool-statement-suffix').value = meta.statement_descriptor_suffix || '';
 
       document.getElementById('tool-mask-level3').checked = meta.mask_level3 === 'yes' || meta.mask_level3 === true;
       document.getElementById('tool-mask-pii').checked = meta.mask_customer_pii === 'yes' || meta.mask_customer_pii === true;
@@ -757,10 +757,11 @@ const UserApp = {
 
   updateLivePreview() {
     const enabled = document.getElementById('tool-meta-enabled').checked;
-    const storeName = document.getElementById('tool-store-name').value || 'BEKAPAINT LIMITED';
-    const siteUrl = document.getElementById('tool-site-url').value || 'hidden';
-    const template = document.getElementById('tool-desc-template').value || '{store_name} - order {order_number}';
-    const suffix = document.getElementById('tool-statement-suffix').value || '';
+    const storeFallback = (this.activeSite && (this.activeSite.site_name || this.activeSite.domain)) || 'Store Name';
+    const storeName = document.getElementById('tool-store-name').value.trim() || storeFallback;
+    const siteUrl = document.getElementById('tool-site-url').value.trim() || 'hidden';
+    const template = document.getElementById('tool-desc-template').value.trim() || '{store_name} - order {order_number}';
+    const suffix = document.getElementById('tool-statement-suffix').value.trim();
     const maskLevel3 = document.getElementById('tool-mask-level3').checked;
     const maskPii = document.getElementById('tool-mask-pii').checked;
     const stripShipping = document.getElementById('tool-strip-shipping').checked;
@@ -788,11 +789,11 @@ const UserApp = {
     let desc = template
       .replace(/{store_name}/g, storeName)
       .replace(/{order_number}/g, '1042')
-      .replace(/{customer_name}/g, maskPii ? 'Customer #1042' : 'Sarah Jenkins')
-      .replace(/{order_date}/g, '2026-10-04')
+      .replace(/{customer_name}/g, maskPii ? 'Customer #1042' : 'John Doe')
+      .replace(/{order_date}/g, new Date().toISOString().split('T')[0])
       .replace(/{order_total}/g, '$129.00');
 
-    document.getElementById('mock-desc-val').innerText = enabled ? desc : 'Your Store Name - Order 1042';
+    document.getElementById('mock-desc-val').innerText = enabled ? desc : `${storeFallback} - Order 1042`;
 
     // Suffix preview
     const suffixRow = document.getElementById('mock-suffix-row');

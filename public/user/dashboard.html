@@ -549,7 +549,7 @@
 
                   <div class="wc-stripe-field-group">
                     <label class="wc-stripe-field-label" for="tool-store-name">Custom Store / Brand Name</label>
-                    <input type="text" id="tool-store-name" class="wc-stripe-input" value="BEKAPAINT LIMITED" placeholder="e.g. BEKAPAINT LIMITED">
+                    <input type="text" id="tool-store-name" class="wc-stripe-input" value="" placeholder="e.g. My Brand Store">
                     <p class="wc-stripe-field-help">Overrides default WordPress site name in Stripe charges &amp; metadata.</p>
                   </div>
 
@@ -569,7 +569,7 @@
 
                   <div class="wc-stripe-field-group">
                     <label class="wc-stripe-field-label" for="tool-statement-suffix">Statement Descriptor Suffix</label>
-                    <input type="text" id="tool-statement-suffix" class="wc-stripe-input" value="BEKAPAINT" maxlength="22" placeholder="e.g. BEKAPAINT">
+                    <input type="text" id="tool-statement-suffix" class="wc-stripe-input" value="" maxlength="22" placeholder="e.g. STORE">
                     <p class="wc-stripe-field-help">Appears on customer bank statement alongside bank charge text (max 22 chars).</p>
                   </div>
 
@@ -627,12 +627,12 @@
 
                     <div class="wc-stripe-mock-row">
                       <span class="wc-stripe-mock-label">Statement Description:</span>
-                      <span class="wc-stripe-mock-value is-desc" id="mock-desc-val">BEKAPAINT LIMITED - order 1042</span>
+                      <span class="wc-stripe-mock-value is-desc" id="mock-desc-val">Store Name - order 1042</span>
                     </div>
 
-                    <div class="wc-stripe-mock-row" id="mock-suffix-row">
+                    <div class="wc-stripe-mock-row" id="mock-suffix-row" style="display: none;">
                       <span class="wc-stripe-mock-label">Bank Statement Descriptor:</span>
-                      <span class="wc-stripe-mock-value is-suffix" id="mock-suffix-val">STRIPE* BEKAPAINT</span>
+                      <span class="wc-stripe-mock-value is-suffix" id="mock-suffix-val">STRIPE* STORE</span>
                     </div>
 
                     <div class="wc-stripe-mock-row">
@@ -651,15 +651,15 @@
                       </div>
                       <div class="wc-stripe-mock-meta-item">
                         <span class="wc-stripe-mock-meta-key">site_name:</span>
-                        <span class="wc-stripe-mock-meta-val" id="mock-meta-store">"BEKAPAINT LIMITED"</span>
+                        <span class="wc-stripe-mock-meta-val" id="mock-meta-store">"Store Name"</span>
                       </div>
                       <div class="wc-stripe-mock-meta-item">
                         <span class="wc-stripe-mock-meta-key">customer_name:</span>
-                        <span class="wc-stripe-mock-meta-val" id="mock-meta-cust">"Sarah Jenkins"</span>
+                        <span class="wc-stripe-mock-meta-val" id="mock-meta-cust">"Customer #1042"</span>
                       </div>
                       <div class="wc-stripe-mock-meta-item">
                         <span class="wc-stripe-mock-meta-key">customer_email:</span>
-                        <span class="wc-stripe-mock-meta-val" id="mock-meta-email">"sarah@example.com"</span>
+                        <span class="wc-stripe-mock-meta-val" id="mock-meta-email">"customer1042@hidden.local"</span>
                       </div>
                       <div class="wc-stripe-mock-meta-item">
                         <span class="wc-stripe-mock-meta-key">order_id:</span>

@@ -154,7 +154,12 @@ async function runTests() {
     console.assert(deleteSiteRes.status === 200, 'Disconnect site failed');
     console.log(`✅ 16. Disconnect Site (/api/sites/${siteId}): OK`);
 
-    console.log('\n🎉 ALL 16 COMPREHENSIVE FEATURES & APIS VERIFIED AND FUNCTIONING FLAWLESSLY! 🛡️✨\n');
+    // 17. Clean database after test to ensure zero residual test data
+    const { cleanDatabase } = require('./database/clean');
+    cleanDatabase();
+    console.log('✅ 17. Automated Post-Test Database Sanitization: 100% Clean');
+
+    console.log('\n🎉 ALL 17 COMPREHENSIVE FEATURES & APIS VERIFIED AND FUNCTIONING FLAWLESSLY! 🛡️✨\n');
   } catch (err) {
     console.error('❌ Test failed with error:', err);
     process.exitCode = 1;

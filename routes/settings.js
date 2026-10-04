@@ -54,10 +54,10 @@ router.get(['/:id/settings', '/:id'], authMiddleware, async (req, res) => {
         // Advanced metadata settings
         metadata_customizer: {
           enabled: 'no',
-          store_name: site.site_name || 'BEKAPAINT LIMITED',
+          store_name: site.site_name || site.domain || 'My Store',
           site_url: 'hidden',
           order_description_template: '{store_name} - order {order_number}',
-          statement_descriptor_suffix: 'BEKAPAINT',
+          statement_descriptor_suffix: '',
           mask_level3: 'no',
           mask_customer_pii: 'no',
           strip_shipping: 'no',
